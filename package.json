@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon -r esm index.js",
+    "test": "jest",
     "gendocs": "jsdoc --recurse --pedantic --destination jsdoc-output ./controllers ./helpers ./models ./routes"
   },
   "keywords": [],
@@ -24,6 +25,11 @@
     "nanoid": "^2.1.11"
   },
   "devDependencies": {
-    "jest": "^29.3.1"
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "jest": "^29.3.1",
+    "mongodb-memory-server": "^8.10.2",
+    "superagent": "^8.0.6",
+    "supertest": "^6.3.3"
   }
 }

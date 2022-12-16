@@ -2,14 +2,14 @@
  * @requires bcrypt
  */
 
-import bcrypt from "bcrypt";
+bcrypt = require('bcrypt');
 
 /**
  * hashes user password
  * @param {string} password - user password, unhashed
  * @return {Promise} promise gives hashed password, otherwise error object
  */
-export const hashPassword = (password) => {
+exports.hashPassword = (password) => {
   return new Promise((resolve, reject) => {
     bcrypt.genSalt(12, (err, salt) => {
       if (err) {
@@ -31,6 +31,6 @@ export const hashPassword = (password) => {
  * @param {string} hashed - hashed password to compare password to
  * @return {bool} true if the same, false if different
  */
-export const comparePassword = (password, hashed) => {
+exports.comparePassword = (password, hashed) => {
   return bcrypt.compare(password, hashed);
 };

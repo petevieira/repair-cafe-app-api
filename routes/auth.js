@@ -4,15 +4,15 @@
  * @requires express
  */
 
-import express from "express";
+const express = require('express');
 
 // create ExpressJS router
 const router = express.Router();
 
 // auth controller actions
 const {
-  signup,
-  signin,
+  signUp,
+  signIn,
   forgotPassword,
   resetPassword,
 } = require("../controllers/auth");
@@ -25,10 +25,10 @@ router.get("/", (req, res) => {
 });
 
 // signup page request
-router.post("/signup", signup);
+router.post("/signup", signUp);
 
 // signin page request
-router.post("/signin", signin);
+router.post("/signin", signIn);
 
 // forgot-password page request
 router.post("/forgot-password", forgotPassword);
@@ -37,4 +37,4 @@ router.post("/forgot-password", forgotPassword);
 router.post("/reset-password", resetPassword);
 
 // export router to app can use it
-export default router;
+module.exports = router;

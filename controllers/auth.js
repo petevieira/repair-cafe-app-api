@@ -1,20 +1,25 @@
 /**
- * @module controllers
+ * @file auth.js
+ * @module auth
  * @description controller actions for authentication endpoints
  * @requires jsonwebtoken
  * @requires nanoid
  */
 
-// import third-party packages
-import jwt from "jsonwebtoken";
-import nanoid from "nanoid";
+// import package for managing JSON web tokens
+const jwt = require('jsonwebtoken');
+// import package for generating unique string IDs
+const nanoid = require('nanoid');
 
-// import project pacakges
-import User from "../models/user";
-import { hashPassword, comparePassword } from "../helpers/auth";
+// import user model
+const User = require('../models/user');
+// import password helpers
+const { hashPassword, comparePassword } = require('../helpers/auth');
 
-// sendgrid
+// parse .env file
 require("dotenv").config();
+
+// import and set up email sending package, SendGrid
 const sgMail = require("@sendgrid/mail");
 sgMail.setApiKey(process.env.SENDGRID_KEY);
 
@@ -29,53 +34,59 @@ const TOKEN_EXPIRATION = '7d';
  * @param {object} res - response object
  * @returns {object} response with json data
  */
-export const signup = async (req, res) => {
+exports.signUp = async (req, res) => {
   console.log("HIT SIGNUP");
   try {
-    // validation
-    const { name, email, password } = req.body;
-    if (!name) {
-      return res.json({
-        error: "Name is required",
-      });
+    // extract request body parameters
+    const { first, last, email, password } = req.body;
+
+    // validate request data
+    if (!first) {
+      return res.json({ error: "First name is required" });
+    }
+    if (!last) {
+      return res.json({ error: "Last name is required" });
     }
     if (!email) {
-      return res.json({
-        error: "Email is required",
-      });
+      return res.json({ error: "Email is required" });
     }
-    if (!password || password.length < 6) {
+    if (!password || password.length < PASSWORD_MIN_LENGTH) {
       return res.json({
         error: "Password is required and should be 6 characters long",
       });
     }
+
+    // check if email already exists in the database
     const exist = await User.findOne({ email });
     if (exist) {
-      return res.json({
-        error: "Email is taken",
-      });
+      return res.json({ error: "Email is taken" });
     }
+
     // hash password
     const hashedPassword = await hashPassword(password);
 
     try {
+      // save new user document to the database
       const user = await new User({
-        name,
+        first,
+        last,
         email,
         password: hashedPassword,
       }).save();
 
       // create signed token
-      const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
-        expiresIn: "7d",
-      });
+      const token = jwt.sign(
+        { _id: user._id },
+        process.env.JWT_SECRET,
+        { expiresIn: TOKEN_EXPIRATION }
+      );
 
-      //   console.log(user);
+      console.log(user);
+      // separate password from the rest of the fields in the user document
       const { password, ...rest } = user._doc;
-      return res.json({
-        token,
-        user: rest,
-      });
+
+      // respond to client with token and user object, excluding password
+      return res.json({ token, user: rest });
     } catch (err) {
       console.log(err);
     }
@@ -91,7 +102,7 @@ export const signup = async (req, res) => {
  * @param {object} res - response object
  * @returns {object} response with json data
  */
-export const signin = async (req, res) => {
+exports.signIn = async (req, res) => {
   // console.log(req.body);
   try {
     const { email, password } = req.body;
@@ -133,7 +144,7 @@ export const signin = async (req, res) => {
  * @param {object} res - response object
  * @returns {object} response with json data
  */
-export const forgotPassword = async (req, res) => {
+exports.forgotPassword = async (req, res) => {
   const { email } = req.body;
   // find user by email
   const user = await User.findOne({ email });
@@ -171,7 +182,7 @@ export const forgotPassword = async (req, res) => {
  * @param {object} res - response object
  * @returns {object} response with json data
  */
-export const resetPassword = async (req, res) => {
+exports.resetPassword = async (req, res) => {
   try {
     const { email, password, resetCode } = req.body;
     // find user based on email and resetCode
