@@ -20,9 +20,13 @@ const app = express();
 
 // db connection
 mongoose
-  .connect(process.env.DATABASE)
-  .then(() => console.log("DB connected"))
-  .catch((err) => console.log("DB CONNECTION ERROR: ", err));
+  .connect(process.env.DATABASE_CONNECTION_STRING)
+  .then(() => {
+    console.log("DB connected");
+  })
+  .catch(err => {
+    console.log("DB CONNECTION ERROR: ", err);
+  });
 
 // set up middleware
 // parse incoming requests with JSON payloads, and set max request body size
@@ -30,7 +34,7 @@ app.use(express.json({ limit: "4mb" }));
 // allow parsing requests with url-encoded payloads, using qs library
 app.use(express.urlencoded({ extended: true }));
 // enable setting up of Cross-origin Resource Sharing rules
-app.use(cors());
+// app.use(cors());
 // use HTTP request logger
 app.use(morgan("dev"));
 

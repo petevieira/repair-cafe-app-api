@@ -20,7 +20,7 @@ const {
 // home page
 router.get("/", (req, res) => {
   return res.json({
-    data: "hello world from kaloraat auth API",
+    data: "hello world from Tucson Repair Cafe auth API",
   });
 });
 
