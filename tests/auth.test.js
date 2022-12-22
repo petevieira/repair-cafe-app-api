@@ -26,8 +26,8 @@ const testUser = {
   password: 'adminpassword'
 };
 
-describe('Test the signup path', () => {
-  test('new user sign-up', async () => {
+describe('/signup', () => {
+  test('should succeed for new user with all fields', async () => {
     const expectedUser = {
       first: testUser.first,
       last: testUser.last,
@@ -50,7 +50,7 @@ describe('Test the signup path', () => {
       });
   });
 
-  test('existing email sign-up', async () => {
+  test('should fail for user with email already in database', async () => {
     await request(app)
       .post('/signup')
       .send(testUser);
@@ -61,8 +61,8 @@ describe('Test the signup path', () => {
   });
 });
 
-describe('Test the signin path', () => {
-  test('existing user sign-in', async () => {
+describe('/signin', () => {
+  test('should succeed for existing user with correct password', async () => {
     // sign user up first
     await request(app).post('/signup').send(testUser);
 
@@ -81,5 +81,16 @@ describe('Test the signin path', () => {
       .catch(err => {
         console.error(err);
       });
+  });
+
+  test('should fail for user with wrong password', async () => {
+    // sign user up first
+    await request(app).post('/signup').send(testUser);
+    let wrongPwdUser = testUser;
+    wrongPwdUser.password = 'wrongpassword';
+    const res = await request(app)
+      .post('/signin')
+      .send(wrongPwdUser);
+    expect(res.statusCode).toBe(StatusCodes.BAD_REQUEST);
   });
 });
