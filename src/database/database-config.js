@@ -7,17 +7,20 @@
 // to read config.env file
 require('dotenv').config();
 // to connect to MongoDB database
-const MongoClient = require("mongodb").MongoClient;
+
 // to connect to database
 const mongoose = require('mongoose');
 mongoose.set('strictQuery', true);
+const MongoClient = require("mongodb");
 
+let connection = MongoClient;
 // test mongo server
-let mongoMemoryServer;
+let MongoMemoryServer = require("mongodb-memory-server");
+let mongoServer;
 
 // load package that allows database connection with unit testing
 if (process.env.NODE_ENVIRONMENT === "test") {
-  mongoMemoryServer = require("mongodb-memory-server");
+  // MongoMemoryServer = require("mongodb-memory-server");
 }
 
 // connection string retreived from Mongodb Atlas
@@ -26,59 +29,71 @@ const connectionOptions = {
   useNewUrlParser: true,
   useUnifiedTopology: true
 };
-const dbName = process.env.DATABASE_NAME;
-
-// create MongoClient
-var _db = null;
 
 // connect to database, either for real or to test database
 if (process.env.NODE_ENVIRONMENT !== "test") {
   // production connection
-  module.exports = {
 
-    /**.
-     * Connects to database
-     *
-     * @param {Function} callback - function to call after finished connecting
-     */
-    connectToDatabase: () => {
-      mongoose.connect(connectionString);
-    },
-  };
+  /**.
+   * Connects to database
+   *
+   * @param {Function} callback - function to call after finished connecting
+   */
+  async function connect() {
+    console.debug("Connecting to real MongoDB cluster");
+    try {
+      await mongoose.connect(connectionString);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  module.exports = { connect };
 } else {
   // test connection
-  module.exports = {
-    /**
-     * connects to database
-     */
-    connectToDatabase: async () => {
-      let mongoServer = new mongoMemoryServer.MongoMemoryServer.create();
-      const mongoUri = await mongoServer.getUri();
-      await mongoose.connect(mongoUri, connectionOptions);
-    },
 
-    /**
-     * closes and stops the MongoDB connection.
-     */
-    closeAndStop: async () => {
-      if (mongo) {
-        await mongoose.connection.dropDatabase();
-        await mongoose.connection.close();
-        await mongo.stop();
-      }
-    },
-    /**
-     * gets the database object
-     *
-     * @returns {Object} database object
-     */
-    dropCollection: async () => {
-      if (mongo) {
-        const collections = await mongoose.connection.db.collections();
-        for (let collection of collections) {
-          await collection.remove();
-        }
-      }
+  /**
+   * connects to database
+   */
+  async function connect() {
+    if (!!mongoServer) {
+      console.debug("Previous MongoMemoryServer active. Stopping it...");
+      mongoServer.stop();
     }
-  };
+    console.debug("Starting MongoMemoryServer server");
+    mongoServer = await MongoMemoryServer.MongoMemoryServer.create()
+    if (!!mongoose.connection) {
+      console.debug("Previous MongoDB connection active. Closing it...");
+      await closeAndStop();
+      await dropCollections();
+    }
+    console.debug("Starting new MongoDB connection");
+    await mongoose.connect(mongoServer.getUri());
+  }
+
+  /**
+   * closes and stops the MongoDB connection.
+   */
+  async function closeAndStop() {
+    console.debug("Dropping MongoDB database");
+    await mongoose.connection.dropDatabase();
+    console.debug("Closing MongoDB connection");
+    await mongoose.connection.close();
+    console.debug("Stopping MongoMemoryServer");
+    await mongoServer.close();
+  }
+  /**
+   * drops all collections that were used
+   *
+   * @returns {Object} database object
+   */
+  async function dropCollections() {
+    console.debug("Deleting MongoDB collections");
+    const collections = mongoose.connection.collections;
+    for (const key in collections) {
+      await collections[key].deleteMany();
+    }
+  }
+
+  module.exports = { connect, closeAndStop, dropCollections };
 }

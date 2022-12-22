@@ -6,8 +6,9 @@
 // third-party packages
 require('dotenv').config();
 const express = require('express');
-const cors = require('cors');
+// const cors = require('cors');
 const mongoose = require('mongoose');
+const database = require('./database/database-config'); // database connection
 
 // project files
 const authRoutes = require('./routes/auth');
@@ -18,15 +19,8 @@ const morgan = require("morgan");
 // create our ExpressJS app
 const app = express();
 
-// db connection
-mongoose
-  .connect(process.env.DATABASE_CONNECTION_STRING)
-  .then(() => {
-    console.log("DB connected");
-  })
-  .catch(err => {
-    console.log("DB CONNECTION ERROR: ", err);
-  });
+// connect to database
+// let db = database.connect();
 
 // set up middleware
 // parse incoming requests with JSON payloads, and set max request body size
@@ -39,7 +33,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 
 // use authentication routes for /api/* routes
-app.use("/api", authRoutes);
+app.use("/", authRoutes);
 
 // export the app
 module.exports = app;

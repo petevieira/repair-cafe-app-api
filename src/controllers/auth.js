@@ -62,6 +62,8 @@ exports.signUp = async (req, res) => {
       return res.json({ error: "Email is taken" });
     }
 
+    console.debug("Your email is unique");
+
     // hash password
     const hashedPassword = await hashPassword(password);
 
