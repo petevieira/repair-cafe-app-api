@@ -11,7 +11,7 @@ const mongoose = require('mongoose');
 const database = require('./database/database-config'); // database connection
 
 // project files
-const authRoutes = require('./routes/auth');
+const authRoutes = require('./routes/auth-routes');
 
 // instantiate HTTP request logger middleware
 const morgan = require("morgan");

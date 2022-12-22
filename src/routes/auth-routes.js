@@ -11,7 +11,7 @@ const express = require('express');
 const router = express.Router();
 
 // auth controller actions
-const authController = require("../controllers/auth");
+const authController = require("../controllers/auth-controller");
 
 // home page
 router.get("/", (req, res) => {

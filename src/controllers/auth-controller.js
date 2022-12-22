@@ -6,8 +6,6 @@
  * @requires nanoid
  */
 
-// import package for managing JSON web tokens
-const jwt = require('jsonwebtoken');
 // import package for generating unique string IDs
 const nanoid = require('nanoid');
 
@@ -16,7 +14,11 @@ const { StatusCodes } = require('http-status-codes');
 // import user model
 const User = require('../models/user');
 // import password helpers
-const { hashPassword, comparePassword } = require('../helpers/auth');
+const {
+  hashPassword,
+  comparePassword,
+  createSignedJwtToken } = require('../helpers/auth-helper');
+const { validateRequest } = require('../helpers/request-helper');
 
 // parse .env file
 require("dotenv").config();
@@ -34,35 +36,21 @@ const TOKEN_EXPIRATION = '7d';
  * @function
  * @param {object} req - request object
  * @param {object} res - response object
- * @returns {object} response with json data
+ * @returns {object} response with User object that was created
+ *   or an error
  */
-exports.signUp = async (req, res) => {
+async function signUp(req, res) {
   console.log("HIT SIGNUP");
+
+  // Check for required request params
+  let result = validateRequest(req.body, 'first', 'last', 'email', 'password');
+  if (result != true) {
+    return res.send(StatusCodes.BAD_REQUEST).json({ error: result });
+  }
+
   try {
     // extract request body parameters
     const { first, last, email, password } = req.body;
-
-    // validate request data
-    if (!first) {
-      return res
-        .send(StatusCodes.BAD_REQUEST)
-        .json({ error: "First name is required" });
-    }
-    if (!last) {
-      return res
-        .send(StatusCodes.BAD_REQUEST)
-        .json({ error: "Last name is required" });
-    }
-    if (!email) {
-      return res
-        .send(StatusCodes.BAD_REQUEST)
-        .json({ error: "Email is required" });
-    }
-    if (!password || password.length < PASSWORD_MIN_LENGTH) {
-      return res
-        .send(StatusCodes.BAD_REQUEST)
-        .json({ error: "Password is required and should be 6 characters long" });
-    }
 
     // check if email already exists in the database
     const exist = await User.findOne({ email });
@@ -75,35 +63,29 @@ exports.signUp = async (req, res) => {
     // hash password
     const hashedPassword = await hashPassword(password);
 
-    try {
-      // save new user document to the database
-      const user = await new User({
-        first,
-        last,
-        email,
-        password: hashedPassword,
-        roles: ['user']
-      }).save();
+    // create and save new user document to the database
+    const user = await new User({
+      first,
+      last,
+      email,
+      password: hashedPassword,
+      roles: ['user']
+    }).save();
 
-      // create signed token
-      const token = jwt.sign(
-        { _id: user._id },
-        process.env.JWT_SECRET,
-        { expiresIn: TOKEN_EXPIRATION }
-      );
+    // create signed token
+    const token = createSignedJwtToken(
+      user._id, process.env.JWT_SECRET, TOKEN_EXPIRATION);
 
-      // separate password from the rest of the fields in the user document
-      const { password, ...rest } = user._doc;
+    // separate password from the rest of the fields in the user document
+    const { pwd, ...rest } = user._doc;
 
-      // respond to client with token and user object, excluding password
-      return res.json({ token, user: rest });
-    } catch (err) {
-      console.log(err);
-    }
+    // respond to client with token and user object, excluding password
+    return res.json({ token, user: rest });
   } catch (err) {
     console.log(err);
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: err});
   }
-};
+}
 
 /**
  * signs an existing user in if the request is valid.
@@ -112,40 +94,47 @@ exports.signUp = async (req, res) => {
  * @param {object} res - response object
  * @returns {object} response with json data
  */
-exports.signIn = async (req, res) => {
-  // console.log(req.body);
+async function signIn(req, res) {
+  // Check for required request params
+  let result = validateRequest(req.body, 'email', 'password');
+  if (result != true) {
+    return res.send(StatusCodes.BAD_REQUEST).json({ error: result });
+  }
+
   try {
     const { email, password } = req.body;
+
     // check if our db has user with that email
     const user = await User.findOne({ email });
     if (!user) {
-      return res.json({
-        error: "No user found",
-      });
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ error: "No user found" });
     }
+
     // check password
     const match = await comparePassword(password, user.password);
     if (!match) {
-      return res.json({
-        error: "Wrong password",
-      });
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ error: "Wrong password" });
     }
-    // create signed token
-    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: TOKEN_EXPIRATION,
-    });
 
+    // create signed token
+    const token = createSignedJwtToken(
+      user._id, process.env.JWT_SECRET, TOKEN_EXPIRATION);
+
+    // get rid of sensitive info for security
     user.password = undefined;
     user.secret = undefined;
-    res.json({
-      token,
-      user,
-    });
+
+    // return success with token and created user object
+    res.json({ token, user });
   } catch (err) {
     console.log(err);
-    return res.status(400).send("Error. Try again.");
+    return res.status(400).send(err);
   }
-};
+}
 
 /**
  * sends user a password reset link via email
@@ -154,7 +143,7 @@ exports.signIn = async (req, res) => {
  * @param {object} res - response object
  * @returns {object} response with json data
  */
-exports.forgotPassword = async (req, res) => {
+async function forgotPassword(req, res) {
   const { email } = req.body;
   // find user by email
   const user = await User.findOne({ email });
@@ -183,7 +172,7 @@ exports.forgotPassword = async (req, res) => {
     console.log(err);
     res.json({ ok: false });
   }
-};
+}
 
 /**
  * reset user password to one in the request
@@ -192,7 +181,7 @@ exports.forgotPassword = async (req, res) => {
  * @param {object} res - response object
  * @returns {object} response with json data
  */
-exports.resetPassword = async (req, res) => {
+async function resetPassword(req, res) {
   try {
     const { email, password, resetCode } = req.body;
     // find user based on email and resetCode
@@ -217,4 +206,6 @@ exports.resetPassword = async (req, res) => {
   } catch (err) {
     console.log(err);
   }
-};
+}
+
+module.exports = { signUp, signIn, forgotPassword, resetPassword };
