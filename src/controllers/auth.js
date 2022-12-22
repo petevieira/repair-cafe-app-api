@@ -11,6 +11,8 @@ const jwt = require('jsonwebtoken');
 // import package for generating unique string IDs
 const nanoid = require('nanoid');
 
+const { StatusCodes } = require('http-status-codes');
+
 // import user model
 const User = require('../models/user');
 // import password helpers
@@ -42,27 +44,33 @@ exports.signUp = async (req, res) => {
 
     // validate request data
     if (!first) {
-      return res.json({ error: "First name is required" });
+      return res
+        .send(StatusCodes.BAD_REQUEST)
+        .json({ error: "First name is required" });
     }
     if (!last) {
-      return res.json({ error: "Last name is required" });
+      return res
+        .send(StatusCodes.BAD_REQUEST)
+        .json({ error: "Last name is required" });
     }
     if (!email) {
-      return res.json({ error: "Email is required" });
+      return res
+        .send(StatusCodes.BAD_REQUEST)
+        .json({ error: "Email is required" });
     }
     if (!password || password.length < PASSWORD_MIN_LENGTH) {
-      return res.json({
-        error: "Password is required and should be 6 characters long",
-      });
+      return res
+        .send(StatusCodes.BAD_REQUEST)
+        .json({ error: "Password is required and should be 6 characters long" });
     }
 
     // check if email already exists in the database
     const exist = await User.findOne({ email });
     if (exist) {
-      return res.json({ error: "Email is taken" });
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ error: "Email is taken" });
     }
-
-    console.debug("Your email is unique");
 
     // hash password
     const hashedPassword = await hashPassword(password);
@@ -74,6 +82,7 @@ exports.signUp = async (req, res) => {
         last,
         email,
         password: hashedPassword,
+        roles: ['user']
       }).save();
 
       // create signed token
@@ -83,7 +92,6 @@ exports.signUp = async (req, res) => {
         { expiresIn: TOKEN_EXPIRATION }
       );
 
-      console.log(user);
       // separate password from the rest of the fields in the user document
       const { password, ...rest } = user._doc;
 
