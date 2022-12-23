@@ -39,7 +39,10 @@ const userSchema = new Schema(
       public_id: "",
       url: "",
     },
-    resetCode: "",
+    resetCode: {
+      type: String,
+      default: "",
+    }
   },
   {
     timestamps: true

@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "NODE_ENVIRONMENT=production nodemon -r esm src/server.js",
-    "test": "NODE_ENVIRONMENT=test && jest --detectOpenHandles --testTimeout=10000",
+    "start": "NODE_ENV=production nodemon -r esm src/server.js",
+    "test": "NODE_ENV=test && jest --detectOpenHandles --testTimeout=10000 --coverage",
     "jsdoc": "jsdoc --recurse --pedantic --destination jsdoc-output ./src ./tests"
   },
   "keywords": [],
