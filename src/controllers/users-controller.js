@@ -1,7 +1,7 @@
 /**
- * @file auth.js
- * @module auth
- * @description controller actions for authentication endpoints
+ * @file users-controller.js
+ * @module users
+ * @description controller actions for user authentication endpoints
  * @requires jsonwebtoken
  * @requires nanoid
  */
@@ -12,7 +12,7 @@ const User = require('../models/user'); // import User model
 const {
   hashPassword,
   comparePassword,
-  createSignedJwtToken } = require('../helpers/auth-helper'); // password helpers
+  createSignedJwtToken } = require('../helpers/users-helper'); // password helpers
 const { validateRequest } = require('../helpers/request-helper'); // validator
 require("dotenv").config(); // parse .env file
 const sgMail = require("@sendgrid/mail"); // for sending emails

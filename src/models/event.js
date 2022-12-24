@@ -13,6 +13,10 @@ const eventSchema = new Schema(
       type: String,
       trim: true,
     },
+    description: {
+      type: String,
+      trim: true
+    },
     locationName: {
       type: String,
       trim: true,
@@ -35,15 +39,11 @@ const eventSchema = new Schema(
       type: String,
       trim: true,
     },
-    description: {
-      type: String,
-      trim: true
-    }
   },
   {
     timestamps: true
   }
 );
 
-// export the user model for use in the app
-export default mongoose.model("Event", eventSchema);
+// export the event model for use in the app
+module.exports = mongoose.model("Event", eventSchema);

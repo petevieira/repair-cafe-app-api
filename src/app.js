@@ -11,16 +11,14 @@ const mongoose = require('mongoose');
 const database = require('./database/database-config'); // database connection
 
 // project files
-const authRoutes = require('./routes/auth-routes');
+const usersRoutes = require('./routes/users-routes');
+const eventsRoutes = require('./routes/events-routes');
 
 // instantiate HTTP request logger middleware
 const morgan = require("morgan");
 
 // create our ExpressJS app
 const app = express();
-
-// connect to database
-// let db = database.connect();
 
 // set up middleware
 // parse incoming requests with JSON payloads, and set max request body size
@@ -33,7 +31,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 
 // use authentication routes for /api/* routes
-app.use("/", authRoutes);
+app.use("/users", usersRoutes);
+app.use("/events", eventsRoutes);
 
 // export the app
 module.exports = app;

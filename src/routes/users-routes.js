@@ -1,6 +1,6 @@
 /**
  * @module routes
- * @description Router for authentication endpoints
+ * @description Router for user authentication endpoints
  * @requires express
  */
 
@@ -10,8 +10,8 @@ const express = require('express');
 // create ExpressJS router
 const router = express.Router();
 
-// auth controller actions
-const authController = require("../controllers/auth-controller");
+// users controller actions
+const usersController = require("../controllers/users-controller");
 
 // home page
 router.get("/", (req, res) => {
@@ -21,16 +21,16 @@ router.get("/", (req, res) => {
 });
 
 // signup page request
-router.post("/signup", authController.signUp);
+router.post("/signup", usersController.signUp);
 
 // signin page request
-router.post("/signin", authController.signIn);
+router.post("/signin", usersController.signIn);
 
 // forgot-password page request
-router.post("/forgot-password", authController.forgotPassword);
+router.post("/forgot-password", usersController.forgotPassword);
 
 // reset-password page request
-router.post("/reset-password", authController.resetPassword);
+router.post("/reset-password", usersController.resetPassword);
 
 // export router to app can use it
 module.exports = router;
