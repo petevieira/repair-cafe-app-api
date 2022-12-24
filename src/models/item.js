@@ -6,7 +6,7 @@
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
-// create user schema
+// create item schema
 const itemSchema = new Schema(
   {
     type: {
@@ -29,11 +29,12 @@ const itemSchema = new Schema(
     status: {
       type: String,
     },
-    images: {
-      public_id: "",
-      url: "",
+    repairDetails: {
+      type: String,
     },
-    resetCode: "",
+    imagesUrls: [{
+      type: String
+    }],
   },
   {
     timestamps: true
@@ -41,4 +42,4 @@ const itemSchema = new Schema(
 );
 
 // export the user model for use in the app
-export default mongoose.model("User", userSchema);
+export default mongoose.model("Item", itemSchema);
