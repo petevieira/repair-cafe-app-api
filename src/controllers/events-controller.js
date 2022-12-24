@@ -5,7 +5,7 @@
  */
 
 const { StatusCodes } = require('http-status-codes'); // for HTTP status codes
-const { Event } = require('../models/event'); // import Event model
+const Event = require('../models/event'); // import Event model
 const { validateRequest } = require('../helpers/request-helper'); // validator
 require("dotenv").config(); // parse .env file
 
@@ -18,44 +18,37 @@ require("dotenv").config(); // parse .env file
  */
 async function addEvent(req, res) {
   // Check for required request params
-  const result = validateRequest(req.body, ['']);
+  const result = validateRequest(req.body, [
+    'title', 'description', 'locationName', 'locationAddress',
+    'startDatetime', 'endDatetime', 'imageUrl']);
   if (result !== true) {
     return res.status(StatusCodes.BAD_REQUEST).json({ error: result });
   }
 
   try {
     // extract request body parameters
-    const { first, last, email, password } = req.body;
+    const {
+      title, description, locationName, locationAddress,
+      startDatetime, endDatetime, imageUrl
+    } = req.body;
 
     // check if email already exists in the database
-    const exist = await User.findOne({ email: email });
-    if (exist) {
+    const existingEvent = await Event.findOne({
+      locationName: locationName, startDatetime: startDatetime });
+    if (existingEvent) {
       return res
         .status(StatusCodes.BAD_REQUEST)
-        .json({ error: "Email is taken" });
+        .json({ error: "Event already exists: " + JSON.stringify(existingEvent) });
     }
 
-    // hash password
-    const hashedPassword = await hashPassword(password);
-
     // create and save new user document to the database
-    const user = await new User({
-      first,
-      last,
-      email,
-      password: hashedPassword,
-      roles: ['user']
+    const event = await new Event({
+      title, description, locationName, locationAddress,
+      startDatetime, endDatetime, imageUrl
     }).save();
 
-    // create signed token
-    const token = createSignedJwtToken(
-      user._id, process.env.JWT_SECRET, TOKEN_EXPIRATION);
-
-    // separate password from the rest of the fields in the user document
-    const { pwd, ...rest } = user._doc;
-
     // respond to client with token and user object, excluding password
-    return res.json({ token, user: rest });
+    return res.json({ event: event });
   } catch (err) {
     console.error(err);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: err});

@@ -7,12 +7,7 @@ const sgMail = require('@sendgrid/mail');
 const defaultMailOptions = { response: 'Okay' };
 
 const request = require('supertest'); // for testing CRUD functions
-const {
-  ReasonPhrases,
-  StatusCodes,
-  getReasonPhrase,
-  getStatusCode,
-} = require('http-status-codes'); // for HTTP status codes
+const { StatusCodes } = require('http-status-codes'); // for HTTP status codes
 
 const app = require('../../src/app');
 const db = require('../database/test-database-config');
@@ -231,7 +226,7 @@ describe('/users/reset-password', () => {
     const requestData = { email: testUser.email, newPassword: 'asdfasdf' };
 
     // act
-    const res = await request(app).post('/reset-password').send(requestData);
+    const res = await request(app).post('/users/reset-password').send(requestData);
 
     // assert
     expect(res.status).toBe(StatusCodes.BAD_REQUEST);
@@ -277,7 +272,7 @@ describe('/users/reset-password', () => {
     };
 
     // act
-    const res = await request(app).post('/reset-password').send(requestData);
+    const res = await request(app).post('/users/reset-password').send(requestData);
 
     // assert
     expect(res.status).toBe(StatusCodes.BAD_REQUEST);
@@ -289,7 +284,7 @@ describe('/users/reset-password', () => {
     const requestData = { email: testUser.email, resetCode: 'wrongCode' };
 
     // act
-    const res = await request(app).post('/reset-password').send(requestData);
+    const res = await request(app).post('/users/reset-password').send(requestData);
 
     // assert
     expect(res.status).toBe(StatusCodes.BAD_REQUEST);
