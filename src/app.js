@@ -14,10 +14,12 @@ const morgan = require("morgan"); // instantiate HTTP request logger middleware
 const swaggerJSDoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
+const swaggerSpec = require('./swagger-jsdoc'); // swagger jsdoc
 const database = require('./database/database-config'); // database connection
 const usersRoutes = require('./routes/users-routes'); // users routes
 const eventsRoutes = require('./routes/events-routes'); // events routes
-const swaggerSpec = require('./swagger-jsdoc'); // swagger jsdoc
+const itemTypeRoutes = require('./routes/item-types-routes'); // item-type routes
+
 
 // create our ExpressJS app
 const app = express();
@@ -35,6 +37,7 @@ app.use(morgan('dev'));
 // use authentication routes for /api/* routes
 app.use('/users', usersRoutes);
 app.use('/events', eventsRoutes);
+app.use('/itemTypes', itemTypeRoutes);
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // export the app

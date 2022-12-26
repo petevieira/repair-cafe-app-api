@@ -4,11 +4,7 @@
  */
 
 const mongoose = require('mongoose');
-jest.mock('@sendgrid/mail');
-const sgMail = require('@sendgrid/mail');
-const defaultMailOptions = { response: 'Okay' };
-
-const request = require('supertest'); // for testing CRUD functions
+const request = require('supertest'); // for testing REST functions
 const { StatusCodes } = require('http-status-codes'); // for HTTP status codes
 
 const app = require('../../src/app');

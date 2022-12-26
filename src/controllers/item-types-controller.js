@@ -55,7 +55,7 @@ async function addItemType(req, res) {
 }
 
 /**
- * deletes an ItemType from the events collection if the request is valid.
+ * deletes an ItemType from the ItemTypes collection if the request is valid.
  * ItemType's ID is provided to select which ItemType to delete.
  * @function
  * @param {object} req - request object
@@ -87,8 +87,8 @@ async function deleteItemType(req, res) {
  * updates an existing ItemType if the request is valid.
  * @function
  * @param {object} req - request object
- * @param {object} req.body.updatedItemType - Event object with desired updated
- *   properties. it must at least contain '_id' to find the Event to update.
+ * @param {object} req.body.updatedItemType - ItemType object with desired updated
+ *   properties. it must at least contain '_id' to find the ItemType to update.
  * @param {object} res - response object
  * @param {object} res.body.data - response data
  * @param {object} res.body.data.updatedItemType - updated ItemType (on success)
@@ -113,15 +113,8 @@ async function updateItemType(req, res) {
         StatusCodes.BAD_REQUEST);
     }
     // update document based on request
-    itemType.title = updatedItemType.title || event.title;
-    itemType.description = updatedItemType.description || event.description;
-    itemType.locationName = updatedItemType.locationName || event.locationName;
-    itemType.locationAddress =
-      updatedItemType.locationAddress || event.locationAddress;
-    itemType.startDatetime =
-      updatedItemType.startDatetime || event.startDatetime;
-    itemType.endDatetime = updatedItemType.endDatetime || event.endDatetime;
-    itemType.imageUrl = updatedItemType.imageUrl || event.imageUrl;
+    itemType.name = updatedItemType.name || itemType.name;
+    itemType.imageUrl = updatedItemType.imageUrl || itemType.imageUrl;
     const savedItemType = await itemType.save();
     return sendResponse(res, 'ItemType updated successfully', savedItemType);
   } catch (err) {
@@ -139,7 +132,7 @@ async function updateItemType(req, res) {
  * @param {string} res.body.msg - error/success message
  * @returns {object} response object
  */
-async function getEvents(req, res) {
+async function getItemTypes(req, res) {
   let filter = {};
   if (req.body.filter !== undefined) {
     filter = req.body.filter;

@@ -25,5 +25,5 @@ const itemTypeSchema = new Schema(
   }
 );
 
-// export the user model for use in the app
-export default mongoose.model("ItemType", itemTypeSchema);
+// export the ItemType model for use in the app
+module.exports = mongoose.model("ItemType", itemTypeSchema);
