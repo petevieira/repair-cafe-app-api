@@ -1,4 +1,5 @@
 /**
+ * @module users
  * @requires controllers/users
  */
 

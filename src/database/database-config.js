@@ -26,9 +26,7 @@ mongoose.set('strictQuery', true);
 const connectionString = process.env.DATABASE_CONNECTION_STRING;
 
 /**.
- * Connects to database
- *
- * @param {Function} callback - function to call after finished connecting
+ * connects to database
  */
 async function connect() {
   console.debug("Connecting to real MongoDB cluster...");

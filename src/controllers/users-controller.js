@@ -28,13 +28,19 @@ const TOKEN_EXPIRATION = '7d';
  * signs user up if the request is valid.
  * @function
  * @param {object} req - request object
+ * @param {string} req.body.first - first name of user
+ * @param {string} req.body.last - last name of user
+ * @param {string} req.body.email - email of user
+ * @param {string} req.body.password - password of user
  * @param {object} res - response object
  * @returns {object} response with User object that was created
  *   or an error
  */
 async function signUp(req, res) {
   // Check for required request params
-  const result = validateRequest(req.body, ['first', 'last', 'email', 'password']);
+  const result = validateRequest(req.body, [
+    'first', 'last', 'email', 'password'
+  ]);
   if (result !== true) {
     return res.status(StatusCodes.BAD_REQUEST).json({ error: result });
   }
@@ -145,7 +151,7 @@ async function forgotPassword(req, res) {
   const { email } = req.body;
 
   // find user by email
-  const user = await User.findOne({ email: email });
+  let user = await User.findOne({ email: email });
   if (!user) {
     return res.status(StatusCodes.BAD_REQUEST)
       .json({ error: "User with that email not found" });
