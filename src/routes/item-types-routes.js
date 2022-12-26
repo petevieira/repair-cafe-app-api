@@ -1,7 +1,7 @@
 /**
- * @namespace events
- * @module events-routes
- * @description Router for events endpoints
+ * @namespace itemTypes
+ * @module item-types-routes
+ * @description Router for itemTypes endpoints
  * @requires express
  */
 
@@ -12,13 +12,13 @@ const express = require('express');
 const router = express.Router();
 
 // auth controller actions
-const eventsController = require("../controllers/events-controller");
+const itemTypesController = require("../controllers/item-types-controller");
 
 /**
  * @swagger
- * /events/addEvent:
+ * /events/addItemType:
  *   post:
- *     summary: Adds an event document to the database
+ *     summary: Adds an item type document to the database
  *     requestBody:
  *       required: true
  *       content:
@@ -26,45 +26,30 @@ const eventsController = require("../controllers/events-controller");
  *           schema:
  *             type: object
  *             properties:
- *               title:
+ *               name:
  *                 type: string
- *                 description: Event title
- *               description:
- *                 type: string
- *                 description: Summary of event
- *               locationName:
- *                 type: string
- *                 description: Name of event location
- *               locationAddress:
- *                 type: string
- *                 description: Address of event location
- *               startDatetime:
- *                 type: string
- *                 description: Date and time of start of event
- *               endDatetime:
- *                 type: string
- *                 description: Date and time of end of event
+ *                 description: item type name
  *               imageUrl:
  *                 type: string
- *                 description: URL to event image
+ *                 description: URL to image of item type
  *     responses:
  *       200:
- *         description: Added event
+ *         description: Item type added to database
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 event:
+ *                 itemType:
  *                   type: object
  *       400:
- *         description: Invalid request data; Event already exists
+ *         description: Invalid request data; ItemType already exists
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 error:
+ *                 msg:
  *                   type: string
  *       500:
  *         description: Internal server error
@@ -73,16 +58,16 @@ const eventsController = require("../controllers/events-controller");
  *             schema:
  *               type: object
  *               properties:
- *                 error:
+ *                 msg:
  *                   type: string
  */
-router.post("/addEvent", eventsController.addEvent);
+router.post("/addItemType", itemTypesController.addItemType);
 
 /**
  * @swagger
- * /events/deleteEvent:
+ * /events/deleteItemType:
  *   post:
- *     summary: Deletes an event, given an event id
+ *     summary: Deletes an ItemType, given an ItemType id
  *     requestBody:
  *       required: true
  *       content:
@@ -90,13 +75,13 @@ router.post("/addEvent", eventsController.addEvent);
  *           schema:
  *             type: object
  *             properties:
- *               eventId:
+ *               itemTypeId:
  *                 required: true
  *                 type: string
- *                 description: ID of event to delete
+ *                 description: ID of ItemType to delete
  *     responses:
  *       200:
- *         description: Event was deleted
+ *         description: ItemType was deleted
  *         content:
  *           application/json:
  *             schema:
@@ -112,17 +97,17 @@ router.post("/addEvent", eventsController.addEvent);
  *             schema:
  *               type: object
  *               properties:
- *                 error:
+ *                 msg:
  *                   type: string
  *                   description: error message
  */
-router.post("/deleteEvent", eventsController.deleteEvent);
+router.post("/deleteItemType", itemTypesController.deleteItemType);
 
 /**
  * @swagger
- * /events/updateEvent:
+ * /events/updateItemType:
  *   post:
- *     summary: Updates an existing event
+ *     summary: Updates an existing ItemType
  *     requestBody:
  *       required: true
  *       content:
@@ -130,22 +115,22 @@ router.post("/deleteEvent", eventsController.deleteEvent);
  *           schema:
  *             type: object
  *             properties:
- *               updatedEvent:
+ *               updatedItemType:
  *                 type: object
  *                 required: true
- *                 description: New event object with one or more updated properties
+ *                 description: New ItemType object with one or more updated properties
  *                 properties:
  *                   _id:
  *                     required: true
  *                     type: string
- *                     description: ID of existing event to modify
- *                   title:
+ *                     description: ID of existing ItemType to modify
+ *                   name:
  *                     required: false
  *                     type: string
- *                     description: New title of the event
+ *                     description: New name of the ItemType
  *     responses:
  *       200:
- *         description: Event was updated
+ *         description: ItemType was updated
  *         content:
  *           application/json:
  *             schema:
@@ -153,25 +138,25 @@ router.post("/deleteEvent", eventsController.deleteEvent);
  *               properties:
  *                 event:
  *                   type: object
- *                   description: updated event
+ *                   description: updated ItemType
  *       400:
- *         description: Invalid request data; Event not found
+ *         description: Invalid request data; ItemType not found
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 error:
+ *                 msg:
  *                   type: string
  *                   description: error message
  */
-router.post("/updateEvent", eventsController.updateEvent);
+router.post("/updateItemType", itemTypesController.updateItemType);
 
 /**
  * @swagger
- * /events/getEvents:
+ * /events/getItemTypes:
  *   post:
- *     summary: Gets all events after applying client's filter
+ *     summary: Gets all ItemTypes after appylying client's filter
  *     requestBody:
  *       required: false
  *       content:
@@ -182,18 +167,18 @@ router.post("/updateEvent", eventsController.updateEvent);
  *               filter:
  *                 type: object
  *                 required: false
- *                 description: Filter for query of events. See https://mongoosejs.com/docs/api.html#model_Model-find
+ *                 description: Filter for query of ItemTypes. See https://mongoosejs.com/docs/api.html#model_Model-find
  *     responses:
  *       200:
- *         description: Events were found and returned
+ *         description: ItemTypes were found and returned
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 events:
+ *                 itemTypes:
  *                   type: array
- *                   description: array of event objects
+ *                   description: array of ItemType objects
  *       400:
  *         description: Invalid request data; Event not found
  *         content:
@@ -201,10 +186,10 @@ router.post("/updateEvent", eventsController.updateEvent);
  *             schema:
  *               type: object
  *               properties:
- *                 error:
+ *                 msg:
  *                   type: string
  */
-router.post("/getEvents", eventsController.getEvents);
+router.post("/getItemTypes", itemTypesController.getItemTypes);
 
 // export router to app can use it
 module.exports = router;

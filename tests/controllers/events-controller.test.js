@@ -1,5 +1,5 @@
 /**
- * @module events
+ * @namespace tests
  * @requires controllers/events
  */
 

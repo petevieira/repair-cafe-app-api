@@ -1,7 +1,7 @@
 
 const {
   objectHasRequiredProperties,
-  validateRequest } = require('../../src/helpers/request-helper'); // validator
+  validateRequest } = require('../../src/helpers/rest-helpers'); // validator
 
 describe('objectHasRequiredProperties', () => {
   test('should succeed if all fields are present', async () => {

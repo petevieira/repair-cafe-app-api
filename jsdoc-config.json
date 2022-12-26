@@ -1,0 +1,11 @@
+{
+  "source": {
+    "include": ["src", "tests"]
+  },
+  "opts": {
+    "destination": "jsdoc-output",
+    "template": "node_modules/docdash",
+    "recurse": true,
+    "verbose": true
+  }
+}

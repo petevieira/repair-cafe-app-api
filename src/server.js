@@ -1,6 +1,7 @@
 /**
  * @file server.js
- * Loads the app and starts listening to requests.
+ * @module server
+ * @description loads the app and starts listening to requests.
  */
 
 // const fs = require('fs'); // for file system interaction
@@ -34,6 +35,6 @@ let db = database.connect();
 // start listening for requests
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log('App is running in ' + process.env.NODE_ENVIRONMENT
+  console.log('App is running in ' + process.env.NODE_ENV
     + ' mode and listening on port ' + port);
 });

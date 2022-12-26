@@ -1,5 +1,6 @@
 /**
- * @module users
+ * @namespace users
+ * @module users-helper
  * @requires bcrypt
  * @requires jsonwebtoken
  */

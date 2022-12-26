@@ -1,6 +1,6 @@
 /**
  * @file test-database-config.js.
- * @module test
+ * @namespace tests
  * @requires mongoose
  * @requires mongodb-memory-server
  * Connects to a MongoDB instance that is stored in memory, specifically used

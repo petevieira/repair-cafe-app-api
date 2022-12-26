@@ -3,6 +3,27 @@
  */
 
 /**
+ * sends response to client with message, data, and status code.
+ * purpose is to have consistent response object for client.
+ * all API responses should call this function to send their response.
+ * @param {object} response - ExpressJS response object
+ * @param {string} msg - response message (success or error)
+ * @param {object} data - response data
+ * @param {number} statusCode - HTTP status code to return
+ * @returns {object} response - { status, body: { msg, data } }
+ */
+function sendResponse(response, msg='', data={}, statusCode=200) {
+  // Make sure response is valid before using it
+  if (!response) {
+    throw new Error('sendResponse(): response object invalid');
+  }
+
+  return response
+    .status(statusCode)
+    .json({ msg: msg, data: data });
+}
+
+/**
  * checks to make sure `obj` has the required properties
  * @param {object} object - object with the params to check for
  * @param {array} requiredProps - array of required properties as strings
@@ -36,4 +57,4 @@ function validateRequest(requestBody, requiredParams) {
   return objectHasRequiredProperties(requestBody, requiredParams, 'request');
 }
 
-module.exports = { objectHasRequiredProperties, validateRequest };
+module.exports = { sendResponse, objectHasRequiredProperties, validateRequest };

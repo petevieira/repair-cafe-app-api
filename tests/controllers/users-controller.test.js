@@ -1,5 +1,5 @@
 /**
- * @module users
+ * @namespace tests
  * @requires controllers/users
  */
 
@@ -54,7 +54,7 @@ describe('/users/signup', () => {
 
     // assert
     expect(res.status).toBe(StatusCodes.OK);
-    const user = res.body.user;
+    const user = res.body.data.user;
     expect(user.first).toEqual(expectedUser.first);
     expect(user.last).toEqual(expectedUser.last);
     expect(user.email).toEqual(expectedUser.email);
@@ -142,8 +142,8 @@ describe('/users/signin', () => {
     console.log("signupRes res: ", signupRes.status);
     expect(signupRes.status).toBe(StatusCodes.OK);
     expect(res.status).toBe(StatusCodes.OK);
-    expect(res.body.token).toBeTruthy();
-    const user = res.body.user;
+    expect(res.body.data.token).toBeTruthy();
+    const user = res.body.data.user;
     expect(user.first).toEqual(testUser.first);
     expect(user.last).toEqual(testUser.last);
     expect(user.email).toEqual(testUser.email);

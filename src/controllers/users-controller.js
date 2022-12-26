@@ -1,6 +1,7 @@
 /**
  * @file users-controller.js
- * @module users
+ * @namespace users
+ * @module users-controller
  * @description controller actions for user authentication endpoints
  * @requires jsonwebtoken
  * @requires nanoid
@@ -12,8 +13,8 @@ const User = require('../models/user'); // import User model
 const {
   hashPassword,
   comparePassword,
-  createSignedJwtToken } = require('../helpers/users-helper'); // password helpers
-const { validateRequest } = require('../helpers/request-helper'); // validator
+  createSignedJwtToken } = require('../helpers/users-helpers'); // password helpers
+const { sendResponse, validateRequest } = require('../helpers/rest-helpers'); // validator
 require("dotenv").config(); // parse .env file
 const sgMail = require("@sendgrid/mail"); // for sending emails
 
@@ -42,7 +43,7 @@ async function signUp(req, res) {
     'first', 'last', 'email', 'password'
   ]);
   if (result !== true) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ error: result });
+    return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
   }
 
   try {
@@ -50,11 +51,9 @@ async function signUp(req, res) {
     const { first, last, email, password } = req.body;
 
     // check if email already exists in the database
-    const exist = await User.findOne({ email: email });
-    if (exist) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ error: "Email is taken" });
+    const emailExists = await User.findOne({ email: email });
+    if (emailExists) {
+      return sendResponse(res, 'Email is taken', {}, StatusCodes.BAD_REQUEST);
     }
 
     // hash password
@@ -77,10 +76,11 @@ async function signUp(req, res) {
     const { pwd, ...rest } = user._doc;
 
     // respond to client with token and user object, excluding password
-    return res.json({ token, user: rest });
+    return sendResponse(
+      res, 'User successfully signed up', { token, user: rest });
   } catch (err) {
     console.error(err);
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: err});
+    return sendResponse(res, err, {}, StatusCodes.INTERNAL_SERVER_ERROR);
   }
 }
 
@@ -95,7 +95,7 @@ async function signIn(req, res) {
   // Check for required request params
   const result = validateRequest(req.body, ['email', 'password']);
   if (result !== true) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ error: result });
+    return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
   }
 
   try {
@@ -104,17 +104,13 @@ async function signIn(req, res) {
     // check if our db has user with that email
     const user = await User.findOne({ email: email });
     if (!user) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ error: "No user found" });
+      return sendResponse(res, 'No user found', {}, StatusCodes.BAD_REQUEST);
     }
 
     // check password
     const match = await comparePassword(password, user.password);
     if (!match) {
-      return res
-        .status(StatusCodes.BAD_REQUEST)
-        .json({ error: "Wrong password" });
+      return sendResponse(res, 'Wrong password', {}, StatusCodes.BAD_REQUEST);
     }
 
     // create signed token
@@ -126,10 +122,10 @@ async function signIn(req, res) {
     user.secret = undefined;
 
     // return success with token and created user object
-    return res.json({ token, user });
+    return sendResponse(res, 'User successfully signed in', { token, user });
   } catch (err) {
     console.error(err);
-    return res.status(StatusCodes.BAD_REQUEST).json({ error: err });
+    return sendResponse(res, err, {}, StatusCodes.BAD_REQUEST);
   }
 }
 
@@ -144,7 +140,7 @@ async function forgotPassword(req, res) {
   // Check for required request params
   const result = validateRequest(req.body, ['email']);
   if (result !== true) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ error: result });
+    return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
   }
 
   // extract params from request body
@@ -153,8 +149,8 @@ async function forgotPassword(req, res) {
   // find user by email
   let user = await User.findOne({ email: email });
   if (!user) {
-    return res.status(StatusCodes.BAD_REQUEST)
-      .json({ error: "User with that email not found" });
+    return sendResponse(
+      res, "User with that email not found", {}, StatusCodes.BAD_REQUEST);
   }
 
   // generate password reset code and save it to the database
@@ -177,11 +173,11 @@ async function forgotPassword(req, res) {
   // send email
   try {
     const data = await sgMail.send(emailData);
-    return res.json({ ok: true });
+    return sendResponse(res, 'Password reset email successfully sent');
   } catch (err) {
     console.error(err);
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({ ok: false, error: 'Failed to send email' });
+    return sendResponse(
+      res, `Failed to send email. $err`, {}, StatusCodes.INTERNAL_SERVER_ERROR);
   }
 }
 
@@ -196,7 +192,7 @@ async function resetPassword(req, res) {
   // Check for required request params
   const result = validateRequest(req.body, ['email', 'resetCode', 'newPassword']);
   if (result !== true) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ error: result });
+    return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
   }
 
   try {
@@ -205,24 +201,27 @@ async function resetPassword(req, res) {
     const user = await User.findOne({ email: email, resetCode: resetCode });
     // if user not found
     if (!user) {
-      return res.status(StatusCodes.BAD_REQUEST)
-        .json({ error: "Email or reset code is invalid" });
+      return sendResponse(
+        res, 'Email or reset code is invalid', {}, StatusCodes.BAD_REQUEST);
     }
     // if password is short
     if (!newPassword || newPassword.length < PASSWORD_MIN_LENGTH) {
-      return res.status(StatusCodes.BAD_REQUEST)
-        .json({ error: `Password is required and should be ` +
-          `${PASSWORD_MIN_LENGTH} characters long`});
+      return sendResponse(
+        res,
+        `Password is required and should be ` +
+          `${PASSWORD_MIN_LENGTH} characters long`,
+        {},
+        StatusCodes.BAD_REQUEST);
     }
     // hash password
     const hashedPassword = await hashPassword(newPassword);
     user.password = hashedPassword;
     user.resetCode = "";
     user.save();
-    return res.json({ ok: true });
+    return sendResponse(res, 'Password successfully reset');
   } catch (err) {
     console.error(err);
-    return res.status(StatusCodes.BAD_REQUEST).json({ error: err });
+    return sendResponse(res, err, {}, StatusCodes.BAD_REQUEST);
   }
 }
 

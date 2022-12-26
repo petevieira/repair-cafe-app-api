@@ -9,7 +9,7 @@ const { Schema } = mongoose;
 // create item schema
 const itemTypeSchema = new Schema(
   {
-    type: {
+    name: {
       type: String,
       trim: true,
       required: true,
