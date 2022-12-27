@@ -10,20 +10,13 @@
 const nanoid = require('nanoid'); // to generate unique reset code
 const { StatusCodes } = require('http-status-codes'); // for HTTP status codes
 const User = require('../models/user'); // import User model
-const {
-  hashPassword,
-  comparePassword,
-  createSignedJwtToken } = require('../helpers/users-helpers'); // password helpers
+const Auth = require('../helpers/auth-helpers'); // password helpers
 const { sendResponse, validateRequest } = require('../helpers/rest-helpers'); // validator
 require("dotenv").config(); // parse .env file
 const sgMail = require("@sendgrid/mail"); // for sending emails
 
 // configure SendGrid email API
 sgMail.setApiKey(process.env.SENDGRID_KEY);
-
-// constants
-const PASSWORD_MIN_LENGTH = 6;
-const TOKEN_EXPIRATION = '7d';
 
 /**
  * signs user up if the request is valid.
@@ -57,7 +50,7 @@ async function signUp(req, res) {
     }
 
     // hash password
-    const hashedPassword = await hashPassword(password);
+    const hashedPassword = await Auth.hashPassword(password);
 
     // create and save new user document to the database
     const user = await new User({
@@ -69,8 +62,7 @@ async function signUp(req, res) {
     }).save();
 
     // create signed token
-    const token = createSignedJwtToken(
-      user._id, process.env.JWT_SECRET, TOKEN_EXPIRATION);
+    const token = await Auth.createSignedToken(user._id);
 
     // separate password from the rest of the fields in the user document
     const { pwd, ...rest } = user._doc;
@@ -108,14 +100,13 @@ async function signIn(req, res) {
     }
 
     // check password
-    const match = await comparePassword(password, user.password);
+    const match = await Auth.comparePassword(password, user.password);
     if (!match) {
       return sendResponse(res, 'Wrong password', {}, StatusCodes.BAD_REQUEST);
     }
 
     // create signed token
-    const token = createSignedJwtToken(
-      user._id, process.env.JWT_SECRET, TOKEN_EXPIRATION);
+    const token = await Auth.createSignedToken(user._id);
 
     // get rid of sensitive info for security
     user.password = undefined;
@@ -205,16 +196,16 @@ async function resetPassword(req, res) {
         res, 'Email or reset code is invalid', {}, StatusCodes.BAD_REQUEST);
     }
     // if password is short
-    if (!newPassword || newPassword.length < PASSWORD_MIN_LENGTH) {
+    if (!newPassword || newPassword.length < process.env.PASSWORD_MIN_LENGTH) {
       return sendResponse(
         res,
         `Password is required and should be ` +
-          `${PASSWORD_MIN_LENGTH} characters long`,
+          `${process.env.PASSWORD_MIN_LENGTH} characters long`,
         {},
         StatusCodes.BAD_REQUEST);
     }
     // hash password
-    const hashedPassword = await hashPassword(newPassword);
+    const hashedPassword = await Auth.hashPassword(newPassword);
     user.password = hashedPassword;
     user.resetCode = "";
     user.save();

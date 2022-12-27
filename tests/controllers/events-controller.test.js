@@ -10,9 +10,15 @@ const { StatusCodes } = require('http-status-codes'); // for HTTP status codes
 const app = require('../../src/app');
 const db = require('../database/test-database-config');
 const Event = require('../../src/models/event');
+const Auth = require('../../src/helpers/auth-helpers');
 
+let token;
 // handle database connection, clearing, and disconnection, and mocks
 beforeAll(async () => await db.connect());
+beforeEach(async () => {
+  // we need to get an auth token to access events endpoints
+  token = Auth.createSignedToken('103');
+});
 afterEach(async () => await db.clear());
 afterAll(async () => await db.close());
 
@@ -32,7 +38,10 @@ describe('/events/addEvent', () => {
     // arrange
 
     // act
-    const res = await request(app).post('/events/addEvent').send(testEvent);
+    const res = await request(app)
+      .post('/events/addEvent')
+      .set('Authorization', `Bearer ${token}`)
+      .send(testEvent);
 
     // assert
     const event = await Event.findOne({ locationName: testEvent.locationName });
@@ -47,7 +56,10 @@ describe('/events/addEvent', () => {
     delete testEvent.title;
 
     // act
-    const res = await request(app).post('/events/addEvent').send(testEvent);
+    const res = await request(app)
+      .post('/events/addEvent')
+      .set('Authorization', `Bearer ${token}`)
+      .send(testEvent);
 
     // assert
     expect(res.status).toBe(StatusCodes.BAD_REQUEST);
@@ -77,6 +89,7 @@ describe('/events/deleteEvent', () => {
     // act
     const res = await request(app)
       .post('/events/deleteEvent')
+      .set('Authorization', `Bearer ${token}`)
       .send({ eventId: event._id });
     const events = await Event.find();
 
@@ -91,6 +104,7 @@ describe('/events/deleteEvent', () => {
     // act
     const res = await request(app)
       .post('/events/deleteEvent')
+      .set('Authorization', `Bearer ${token}`)
       .send({ eventId: "09325" });
     const events = await Event.find();
 
@@ -120,6 +134,7 @@ describe('/events/updateEvent', () => {
     // act
     const res = await request(app)
       .post('/events/updateEvent')
+      .set('Authorization', `Bearer ${token}`)
       .send({ updatedEvent: {
         _id: event._id,
         title: "Updated title" }
@@ -137,6 +152,7 @@ describe('/events/updateEvent', () => {
     // act
     const res = await request(app)
       .post('/events/updateEvent')
+      .set('Authorization', `Bearer ${token}`)
       .send({ updatedEvent: {
         _id: 'aaaaaaaaaaaaaaaaaaaaaaaa',
         title: "Updated title" }

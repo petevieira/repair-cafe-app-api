@@ -34,14 +34,12 @@ let mongoServer = null;
  */
 async function connect() {
   // create memory server instance
-  console.debug("Creating MongoMemoryServer...");
   mongoServer = await MongoMemoryServer.create();
 
   // get the URI of the memory server
   const mongoUri = await mongoServer.getUri();
 
   // connect to the test database
-  console.debug("Connecting MongoMemoryServer using Mongoose...");
   await mongoose.connect(mongoUri, connectionOptions);
 }
 
@@ -49,11 +47,7 @@ async function connect() {
  * closes and stops the MongoDB connection.
  */
 async function close() {
-  console.debug("Dropping MongoDB database...");
   await mongoose.disconnect();
-  console.debug("Closing MongoDB connection...");
-  // await mongoose.connection.close();
-  console.debug("Stopping MongoMemoryServer...");
   await mongoServer.stop();
 }
 /**
@@ -62,7 +56,6 @@ async function close() {
  * @returns {Object} database object
  */
 async function clear() {
-  console.debug("Deleting MongoDB collections");
   const collections = mongoose.connection.collections;
   for (const key in collections) {
     await collections[key].deleteMany();

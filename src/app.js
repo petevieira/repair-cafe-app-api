@@ -19,7 +19,7 @@ const database = require('./database/database-config'); // database connection
 const usersRoutes = require('./routes/users-routes'); // users routes
 const eventsRoutes = require('./routes/events-routes'); // events routes
 const itemTypeRoutes = require('./routes/item-types-routes'); // item-type routes
-
+const Auth = require('./helpers/auth-helpers'); // authentication helpers
 
 // create our ExpressJS app
 const app = express();
@@ -27,17 +27,20 @@ const app = express();
 // set up middleware
 // parse incoming requests with JSON payloads, and set max request body size
 app.use(express.json({ limit: '4mb' }));
+
 // allow parsing requests with url-encoded payloads, using qs library
 app.use(express.urlencoded({ extended: true }));
+
 // enable setting up of Cross-origin Resource Sharing rules
 // app.use(cors());
+
 // use HTTP request logger
 app.use(morgan('dev'));
 
 // use authentication routes for /api/* routes
 app.use('/users', usersRoutes);
-app.use('/events', eventsRoutes);
-app.use('/itemTypes', itemTypeRoutes);
+app.use('/events', Auth.authenticateToken, eventsRoutes);
+app.use('/itemTypes', Auth.authenticateToken, itemTypeRoutes);
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // export the app

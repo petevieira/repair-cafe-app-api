@@ -86,7 +86,6 @@ describe('/users/signup', () => {
   test('should fail if last missing from request', async () => {
     // arrange
     delete testUser.last;
-    console.log(testUser);
 
     // act
     const res = await request(app).post('/users/signup').send(testUser);
@@ -98,7 +97,6 @@ describe('/users/signup', () => {
   test('should fail if email missing from request', async () => {
     // arrange
     delete testUser.email;
-    console.log(testUser);
 
     // act
     const res = await request(app).post('/users/signup').send(testUser);
@@ -110,7 +108,6 @@ describe('/users/signup', () => {
   test('should fail if password missing from request', async () => {
     // arrange
     delete testUser.password;
-    console.log(testUser);
 
     // act
     const res = await request(app).post('/users/signup').send(testUser);
@@ -139,7 +136,6 @@ describe('/users/signin', () => {
     const res = await request(app).post('/users/signin').send(testUser);
 
     // assert
-    console.log("signupRes res: ", signupRes.status);
     expect(signupRes.status).toBe(StatusCodes.OK);
     expect(res.status).toBe(StatusCodes.OK);
     expect(res.body.data.token).toBeTruthy();

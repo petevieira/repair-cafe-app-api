@@ -2,6 +2,8 @@
  * module utils
  */
 
+const { StatusCodes } = require('http-status-codes'); // for HTTP status codes
+
 /**
  * sends response to client with message, data, and status code.
  * purpose is to have consistent response object for client.
@@ -12,7 +14,7 @@
  * @param {number} statusCode - HTTP status code to return
  * @returns {object} response - { status, body: { msg, data } }
  */
-function sendResponse(response, msg='', data={}, statusCode=200) {
+function sendResponse(response, msg='', data={}, statusCode=StatusCodes.OK) {
   // Make sure response is valid before using it
   if (!response) {
     throw new Error('sendResponse(): response object invalid');

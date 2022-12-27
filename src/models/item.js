@@ -38,7 +38,7 @@ const itemSchema = new Schema(
     imagesUrls: [{
       type: String
     }],
-    owner: {
+    ownerId: {
       type: Schema.Type.ObjectId,
       ref: 'User',
       required: true
