@@ -191,5 +191,7 @@ router.post("/updateItemType", itemTypesController.updateItemType);
  */
 router.post("/getItemTypes", itemTypesController.getItemTypes);
 
+router.post("/addItemTypes", itemTypesController.addItemTypes);
+
 // export router to app can use it
 module.exports = router;

@@ -145,4 +145,53 @@ async function getItemTypes(req, res) {
   }
 }
 
-module.exports = { addItemType, deleteItemType, updateItemType, getItemTypes };
+async function addItemTypes(req, res) {
+  // Check for required request params
+  const result = validateRequest(req.body, ['itemTypes']);
+  if (result !== true) {
+    return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
+  }
+
+  let msg = '';
+  const itemTypes = req.body.itemTypes;
+  let itemsAdded = 0;
+
+  for (const [index, itemType] of itemTypes.entries()) {
+    // ensure fields are set
+    if (!itemType.name) {
+      msg +=  ` Item ${index} (${itemType.name}) is missing name field.`;
+      continue;
+    }
+    if (!itemType.imageUrl) {
+      msg += `Item ${index} (${itemType.name}) is missing imageUrl field. ` +
+        `No items were added.`;
+      continue;
+    }
+
+    // check if ItemType with that name already exists in the database
+    const itemTypeExists = await ItemType.findOne({ name: itemType.name });
+    if (itemTypeExists) {
+      continue;
+    }
+
+    // create and save itemType to ItemTypes collection
+    try {
+      await new ItemType(itemType).save();
+      ++itemsAdded;
+    } catch (err) {
+      msg += ` Error saving item ${index} (${itemType.name}).`;
+    }
+  }
+
+  const statusCode = itemsAdded === itemTypes.length ?
+    StatusCodes.OK : StatusCodes.MULTI_STATUS
+
+  return sendResponse(res,
+    `${itemsAdded} item(s) added. ${itemTypes.length - itemsAdded}` +
+    ` item(s) failed. ${msg}`,
+    {}, statusCode);
+}
+
+module.exports = {
+  addItemType, deleteItemType, updateItemType, getItemTypes, addItemTypes
+};

@@ -10,8 +10,8 @@ const { Schema } = mongoose;
 const itemSchema = new Schema(
   {
     type: {
-      type: String,
-      trim: true,
+      type: Schema.Types.ObjectId,
+      ref: 'ItemType',
       required: true,
     },
     make: {
@@ -23,18 +23,36 @@ const itemSchema = new Schema(
       type: String,
       required: false,
     },
-    symptoms: [{
-      type: String,
-    }],
-    status: {
+    symptoms: {
       type: String,
     },
+    possibleCauses: {
+      type: String
+    },
     repairDetails: {
+      type: String,
+    },
+    status: {
       type: String,
     },
     imagesUrls: [{
       type: String
     }],
+    owner: {
+      type: Schema.Type.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    repairers: [{
+      type: Schema.Type.ObjectId,
+      ref: 'User',
+      required: true
+    }],
+    events: [{
+      type: Schema.Type.ObjectId,
+      ref: 'Event',
+      required: true
+    }]
   },
   {
     timestamps: true
