@@ -11,12 +11,14 @@ const router = express.Router(); // create ExpressJS router
 // users controller actions
 const usersController = require('../controllers/users-controller');
 const Auth = require('../helpers/auth-helpers');
-
+const User = require('../models/user'); // import User model
 /**
  */
-router.get("/", (req, res) => {
+router.get("/", async (req, res) => {
+  const users = await User.find();
+  console.log("users: ", users);
   return res.json({
-    data: "hello world from Tucson Repair Cafe auth API",
+    data: users,
   });
 });
 

@@ -18,6 +18,7 @@ process.on("uncaughtException", err => {
   process.exit(1);
 });
 
+
 // read in key and certification for secure HTTP using Open SSL
 // var key = fs.readFileSync(__dirname + "/../ssl-certs/selfsigned.key");
 // var cert = fs.readFileSync(__dirname + "/../ssl-certs/selfsigned.crt");
@@ -34,7 +35,20 @@ let db = database.connect();
 
 // start listening for requests
 const port = process.env.PORT || 3000;
-app.listen(port, () => {
+const server = app.listen(port, () => {
   console.log('App is running in ' + process.env.NODE_ENV
     + ' mode and listening on port ' + port);
 });
+
+function handleSignal(signal) {
+  console.info(`Received ${signal}`);
+  console.log('Closing server...');
+  server.close(async () => {
+    console.log('Server closed');
+  });
+
+}
+
+// handle Interrupt and Terminate signals on command-line
+process.on('SIGINT', handleSignal);
+process.on('SIGTERM', handleSignal);

@@ -23,13 +23,18 @@ const connectionOptions = {
 mongoose.set('strictQuery', true);
 
 // connection string retreived from Mongodb Atlas
-const connectionString = process.env.DATABASE_CONNECTION_STRING;
+let connectionString = '';
+if (process.env.NODE_ENV === 'production') {
+  connectionString = process.env.DATABASE_CONNECTION_STRING;
+} else {
+  connectionString = process.env.DEV_DATABASE_CONNECTION_STRING;
+}
 
 /**.
  * connects to database
  */
 async function connect() {
-  console.debug("Connecting to real MongoDB cluster...");
+  console.debug(`Connecting in ${process.env.NODE_ENV} mode to real MongoDB cluster...`);
   try {
     await mongoose.connect(connectionString);
   } catch (err) {
@@ -37,5 +42,14 @@ async function connect() {
   }
 }
 
-module.exports = { connect };
+async function close() {
+  try {
+    await mongoose.connection.close(false);
+    console.log('MongoDB connection closed');
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+module.exports = { connect, close };
 
