@@ -10,18 +10,16 @@ const { Schema } = mongoose;
 const itemSchema = new Schema(
   {
     type: {
-      type: Schema.Types.ObjectId,
+      typeId: Schema.Types.ObjectId,
       ref: 'ItemType',
       required: true,
     },
     make: {
       type: String,
-      trim: true,
-      required: true,
+      trim: true
     },
     model: {
-      type: String,
-      required: false,
+      type: String
     },
     symptoms: {
       type: String,
@@ -43,12 +41,11 @@ const itemSchema = new Schema(
       ref: 'User',
       required: true
     },
-    repairers: [{
+    primaryRepairerId: {
       type: Schema.Type.ObjectId,
-      ref: 'User',
-      required: true
-    }],
-    events: [{
+      ref: 'User'
+    },
+    eventIds: [{
       type: Schema.Type.ObjectId,
       ref: 'Event',
       required: true

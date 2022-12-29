@@ -61,7 +61,7 @@ const itemTypesController = require("../controllers/item-types-controller");
  *                 msg:
  *                   type: string
  */
-router.post("/addItemType", itemTypesController.addItemType);
+router.post("/add-item-type", itemTypesController.addItemType);
 
 /**
  * @swagger
@@ -101,7 +101,7 @@ router.post("/addItemType", itemTypesController.addItemType);
  *                   type: string
  *                   description: error message
  */
-router.post("/deleteItemType", itemTypesController.deleteItemType);
+router.post("/delete-item-type", itemTypesController.deleteItemType);
 
 /**
  * @swagger
@@ -150,7 +150,7 @@ router.post("/deleteItemType", itemTypesController.deleteItemType);
  *                   type: string
  *                   description: error message
  */
-router.post("/updateItemType", itemTypesController.updateItemType);
+router.post("/update-item-type", itemTypesController.updateItemType);
 
 /**
  * @swagger
@@ -189,9 +189,11 @@ router.post("/updateItemType", itemTypesController.updateItemType);
  *                 msg:
  *                   type: string
  */
-router.post("/getItemTypes", itemTypesController.getItemTypes);
+router.post('/get-item-types', itemTypesController.getItemTypes);
 
-router.post("/addItemTypes", itemTypesController.addItemTypes);
+router.post('/add-item-types', itemTypesController.addItemTypes);
+
+router.post('/get-item-type', itemTypesController.getItemType);
 
 // export router to app can use it
 module.exports = router;

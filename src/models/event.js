@@ -39,6 +39,14 @@ const eventSchema = new Schema(
       type: String,
       trim: true,
     },
+    itemIds: [{
+      type: Schema.Types.ObjectId,
+      ref: 'Item',
+    }],
+    userIds: [{
+      type: Schema.Types.ObjectId,
+      ref: 'User'
+    }]
   },
   {
     timestamps: true

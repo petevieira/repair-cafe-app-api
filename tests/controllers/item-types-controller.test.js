@@ -23,7 +23,7 @@ beforeEach(async () => {
 afterEach(async () => await db.clear());
 afterAll(async () => await db.close());
 
-describe('/itemTypes/addItemType', () => {
+describe('/item-types/add-item-type', () => {
   // create test ItemType for requests
   const testItemType = {
     name: 'wrench',
@@ -35,7 +35,7 @@ describe('/itemTypes/addItemType', () => {
 
     // act
     const res = await request(app)
-    .post('/itemTypes/addItemType')
+    .post('/item-types/add-item-type')
     .set('Authorization', `Bearer ${token}`)
     .send(testItemType);
 
@@ -52,7 +52,7 @@ describe('/itemTypes/addItemType', () => {
 
     // act
     const res = await request(app)
-    .post('/itemTypes/addItemType')
+    .post('/item-types/add-item-type')
     .set('Authorization', `Bearer ${token}`)
     .send(testItemType);
 
@@ -63,7 +63,7 @@ describe('/itemTypes/addItemType', () => {
   });
 });
 
-describe('/itemTypes/deleteItemType', () => {
+describe('/item-types/delete-item-type', () => {
   // create test ItemType for requests
   const testItemType = {
     name: 'Wrench',
@@ -76,7 +76,7 @@ describe('/itemTypes/deleteItemType', () => {
 
     // act
     const res = await request(app)
-    .post('/itemTypes/deleteItemType')
+    .post('/item-types/delete-item-type')
     .set('Authorization', `Bearer ${token}`)
     .send({ itemTypeId: itemType._id });
     const itemTypes = await ItemType.find();
@@ -91,7 +91,7 @@ describe('/itemTypes/deleteItemType', () => {
 
     // act
     const res = await request(app)
-    .post('/itemTypes/deleteItemType')
+    .post('/item-types/delete-item-type')
     .set('Authorization', `Bearer ${token}`)
     .send({ itemTypeId: "09325" });
     const itemTypes = await ItemType.find();
@@ -102,7 +102,7 @@ describe('/itemTypes/deleteItemType', () => {
   });
 });
 
-describe('/itemTypes/updateItemType', () => {
+describe('/item-types/update-item-type', () => {
   // create test ItemType for requests
   const testItemType = {
     name: 'Wrench',
@@ -115,7 +115,7 @@ describe('/itemTypes/updateItemType', () => {
 
     // act
     const res = await request(app)
-    .post('/itemTypes/updateItemType')
+    .post('/item-types/update-item-type')
     .set('Authorization', `Bearer ${token}`)
     .send({ updatedItemType: {
       _id: itemType._id,
@@ -133,7 +133,7 @@ describe('/itemTypes/updateItemType', () => {
 
     // act
     const res = await request(app)
-    .post('/itemTypes/updateItemType')
+    .post('/item-types/update-item-type')
     .set('Authorization', `Bearer ${token}`)
     .send({ updatedItemType: {
       _id: 'aaaaaaaaaaaaaaaaaaaaaaaa',
@@ -147,7 +147,7 @@ describe('/itemTypes/updateItemType', () => {
   });
 });
 
-describe('/itemTypes/addItemTypes', () => {
+describe('/item-types/add-item-types', () => {
   let newItemTypes = [
   {
     "name": "toaster",
@@ -344,7 +344,7 @@ test('should add all ItemTypes', async () => {
 
     // act
   const res = await request(app)
-  .post('/itemTypes/addItemTypes')
+  .post('/item-types/add-item-types')
   .set('Authorization', `Bearer ${token}`)
   .send({ itemTypes: newItemTypes });
   const itemTypes = await ItemType.find();
@@ -363,7 +363,7 @@ test('should fail if name or imageUrl is missing or empty', async () => {
 
     // act
   const res = await request(app)
-  .post('/itemTypes/addItemTypes')
+  .post('/item-types/add-item-types')
   .set('Authorization', `Bearer ${token}`)
   .send({ itemTypes: newItemTypes });
   const itemTypes = await ItemType.find();

@@ -30,7 +30,7 @@ afterEach(async () => {
 });
 afterAll(async () => await db.close());
 
-describe('/users/signup', () => {
+describe('/users/sign-up', () => {
   // test user for requests
   const testUser = {
     first: 'john',
@@ -50,7 +50,7 @@ describe('/users/signup', () => {
     };
 
     // act
-    const res = await request(app).post('/users/signup').send(testUser);
+    const res = await request(app).post('/users/sign-up').send(testUser);
 
     // assert
     expect(res.status).toBe(StatusCodes.OK);
@@ -63,10 +63,10 @@ describe('/users/signup', () => {
 
   test('should fail for user with email already in database', async () => {
     // arrange
-    await request(app).post('/users/signup').send(testUser);
+    await request(app).post('/users/sign-up').send(testUser);
 
     // act
-    const res = await request(app).post('/users/signup').send(testUser);
+    const res = await request(app).post('/users/sign-up').send(testUser);
 
     // assert
     expect(res.status).toBe(StatusCodes.BAD_REQUEST);
@@ -77,7 +77,7 @@ describe('/users/signup', () => {
     delete testUser.first;
 
     // act
-    const res = await request(app).post('/users/signup').send(testUser);
+    const res = await request(app).post('/users/sign-up').send(testUser);
 
     // assert
     expect(res.status).toBe(StatusCodes.BAD_REQUEST);
@@ -88,7 +88,7 @@ describe('/users/signup', () => {
     delete testUser.last;
 
     // act
-    const res = await request(app).post('/users/signup').send(testUser);
+    const res = await request(app).post('/users/sign-up').send(testUser);
 
     // assert
     expect(res.status).toBe(StatusCodes.BAD_REQUEST);
@@ -99,7 +99,7 @@ describe('/users/signup', () => {
     delete testUser.email;
 
     // act
-    const res = await request(app).post('/users/signup').send(testUser);
+    const res = await request(app).post('/users/sign-up').send(testUser);
 
     // assert
     expect(res.status).toBe(StatusCodes.BAD_REQUEST);
@@ -110,14 +110,14 @@ describe('/users/signup', () => {
     delete testUser.password;
 
     // act
-    const res = await request(app).post('/users/signup').send(testUser);
+    const res = await request(app).post('/users/sign-up').send(testUser);
 
     // assert
     expect(res.status).toBe(StatusCodes.BAD_REQUEST);
   });
 });
 
-describe('/users/signin', () => {
+describe('/users/sign-in', () => {
   // test user for requests
   const testUser = {
     first: 'john',
@@ -130,10 +130,10 @@ describe('/users/signin', () => {
   test('should succeed for existing user with correct password', async () => {
     // arrange
     // sign user up first
-    const signupRes = await request(app).post('/users/signup').send(testUser);
+    const signupRes = await request(app).post('/users/sign-up').send(testUser);
 
     // act
-    const res = await request(app).post('/users/signin').send(testUser);
+    const res = await request(app).post('/users/sign-in').send(testUser);
 
     // assert
     expect(signupRes.status).toBe(StatusCodes.OK);
@@ -149,12 +149,12 @@ describe('/users/signin', () => {
   test('should fail for user with wrong password', async () => {
     // arrange
     // sign user up first
-    await request(app).post('/users/signup').send(testUser);
+    await request(app).post('/users/sign-up').send(testUser);
     let wrongPwdUser = testUser;
     wrongPwdUser.password = 'wrongpassword';
 
     // act
-    const res = await request(app).post('/users/signin').send(wrongPwdUser);
+    const res = await request(app).post('/users/sign-in').send(wrongPwdUser);
 
     // assert
     expect(res.status).toBe(StatusCodes.BAD_REQUEST);
@@ -184,7 +184,7 @@ describe('/users/forgot-password', () => {
 
   test('should fail if email cannot be found', async () => {
     // arrange
-    await request(app).post('/users/signup').send(testUser);
+    await request(app).post('/users/sign-up').send(testUser);
     const requestData = { email: 'wrongemail@gmail.com' };
 
     // act
@@ -196,14 +196,17 @@ describe('/users/forgot-password', () => {
 
   test('should succeed if valid email provided', async () => {
     // arrange
-    await request(app).post('/users/signup').send(testUser);
+    await request(app).post('/users/sign-up').send(testUser);
     const requestData = { email: testUser.email };
 
     // act
     const res = await request(app).post('/users/forgot-password').send(requestData);
+    const user = await User.find({ email: testUser.email });
 
     // assert
     expect(res.status).toBe(StatusCodes.OK);
+    expect(user).toBeTruthy();
+    expect(user.resetCode).not.toEqual('')
   });
 });
 
@@ -219,7 +222,7 @@ describe('/users/reset-password', () => {
 
   test('should fail if resetCode is not provided', async () => {
     // arrange
-    await request(app).post('/users/signup').send(testUser);
+    await request(app).post('/users/sign-up').send(testUser);
     const requestData = { email: testUser.email, newPassword: 'asdfasdf' };
 
     // act
@@ -231,7 +234,7 @@ describe('/users/reset-password', () => {
 
   test('should fail if email is not provided', async () => {
     // arrange
-    await request(app).post('/users/signup').send(testUser);
+    await request(app).post('/users/sign-up').send(testUser);
     const requestData = {
       resetCode: testUser.resetCode,
       newPassword: 'asdfasdf'
@@ -246,7 +249,7 @@ describe('/users/reset-password', () => {
 
   test('should fail if newPassword is not provided', async () => {
     // arrange
-    await request(app).post('/users/signup').send(testUser);
+    await request(app).post('/users/sign-up').send(testUser);
     const requestData = {
       email: testUser.email,
       resetCode: testUser.resetCode,
@@ -261,7 +264,7 @@ describe('/users/reset-password', () => {
 
   test('should fail if email is incorrect not found in any users', async () => {
     // arrange
-    await request(app).post('/users/signup').send(testUser);
+    await request(app).post('/users/sign-up').send(testUser);
     const requestData = {
       email: 'wrongemail@gmail.com',
       resetCode: testUser.resetCode,
@@ -277,7 +280,7 @@ describe('/users/reset-password', () => {
 
   test('should fail if resetCode not found in any users', async () => {
     // arrange
-    await request(app).post('/users/signup').send(testUser);
+    await request(app).post('/users/sign-up').send(testUser);
     const requestData = { email: testUser.email, resetCode: 'wrongCode' };
 
     // act
@@ -289,7 +292,7 @@ describe('/users/reset-password', () => {
 
   test('should fail if new password does not meet requirements', async () => {
     // arrange
-    await request(app).post('/users/signup').send(testUser);
+    await request(app).post('/users/sign-up').send(testUser);
     const requestData = { email: 'test@gmail.com', newPassword: 'short' };
 
     // act
@@ -301,7 +304,7 @@ describe('/users/reset-password', () => {
 
   test('should succeed if valid email, resetCode, and password', async () => {
     // arrange
-    const signupRes = await request(app).post('/users/signup').send(testUser);
+    const signupRes = await request(app).post('/users/sign-up').send(testUser);
     let user = await User.findOne({ email: testUser.email });
     user.resetCode = testUser.resetCode;
     user.save();

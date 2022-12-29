@@ -22,7 +22,7 @@ beforeEach(async () => {
 afterEach(async () => await db.clear());
 afterAll(async () => await db.close());
 
-describe('/events/addEvent', () => {
+describe('/events/add-event', () => {
   // create test event for requests
   const testEvent = {
     title: 'Second Saturday Repair Event',
@@ -39,7 +39,7 @@ describe('/events/addEvent', () => {
 
     // act
     const res = await request(app)
-      .post('/events/addEvent')
+      .post('/events/add-event')
       .set('Authorization', `Bearer ${token}`)
       .send(testEvent);
 
@@ -57,7 +57,7 @@ describe('/events/addEvent', () => {
 
     // act
     const res = await request(app)
-      .post('/events/addEvent')
+      .post('/events/add-event')
       .set('Authorization', `Bearer ${token}`)
       .send(testEvent);
 
@@ -68,7 +68,7 @@ describe('/events/addEvent', () => {
   });
 });
 
-describe('/events/deleteEvent', () => {
+describe('/events/delete-event', () => {
   // create test event for requests
   const testEvent = {
     title: 'Second Saturday Repair Event',
@@ -88,7 +88,7 @@ describe('/events/deleteEvent', () => {
 
     // act
     const res = await request(app)
-      .post('/events/deleteEvent')
+      .post('/events/delete-event')
       .set('Authorization', `Bearer ${token}`)
       .send({ eventId: event._id });
     const events = await Event.find();
@@ -103,7 +103,7 @@ describe('/events/deleteEvent', () => {
 
     // act
     const res = await request(app)
-      .post('/events/deleteEvent')
+      .post('/events/delete-event')
       .set('Authorization', `Bearer ${token}`)
       .send({ eventId: "09325" });
     const events = await Event.find();
@@ -113,7 +113,7 @@ describe('/events/deleteEvent', () => {
   });
 });
 
-describe('/events/updateEvent', () => {
+describe('/events/update-event', () => {
   // create test event for requests
   const testEvent = {
     title: 'Second Saturday Repair Event',
@@ -133,7 +133,7 @@ describe('/events/updateEvent', () => {
 
     // act
     const res = await request(app)
-      .post('/events/updateEvent')
+      .post('/events/update-event')
       .set('Authorization', `Bearer ${token}`)
       .send({ updatedEvent: {
         _id: event._id,
@@ -151,7 +151,7 @@ describe('/events/updateEvent', () => {
 
     // act
     const res = await request(app)
-      .post('/events/updateEvent')
+      .post('/events/update-event')
       .set('Authorization', `Bearer ${token}`)
       .send({ updatedEvent: {
         _id: 'aaaaaaaaaaaaaaaaaaaaaaaa',

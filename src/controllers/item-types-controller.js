@@ -192,6 +192,40 @@ async function addItemTypes(req, res) {
     {}, statusCode);
 }
 
+/**
+ * gets the ItemType specified by the filter
+ * @function
+ * @param {object} req - request object. no parameters should be sent.
+ * @param {object} req.body.filter - query filter
+ * @param {object} res - response object
+ * @param {object} res.body.data - response data object
+ * @param {arary}  res.body.data.itemType -  desired ItemType (on success)
+ * @param {string} res.body.msg - error/success message
+ * @returns {object} response object
+ */
+async function getItemType(res, req) {
+  // Check for required request params
+  const result = validateRequest(req.body, ['filter']);
+  if (result !== true) {
+    return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
+  }
+
+  const filter = req.body.filter;
+
+  try {
+    const itemType = await ItemType.find(filter);
+    if (!itemType) {
+      return sendResponse(res,
+        `No ItemType found with a filter of ${filter}`,
+        {}, StatusCodes.BAD_REQUEST);
+    }
+    return sendResponse(res, 'ItemType found', itemType);
+  } catch (err) {
+    return sendResponse(res, err, {}, StatusCodes.INTERNAL_SERVER_ERROR);
+  }
+}
+
 module.exports = {
-  addItemType, deleteItemType, updateItemType, getItemTypes, addItemTypes
+  addItemType, deleteItemType, updateItemType,
+  getItemTypes, addItemTypes, getItemType
 };

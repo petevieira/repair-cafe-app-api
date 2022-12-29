@@ -5,14 +5,12 @@
  * @requires express
  */
 
-// for access to ExpressJS router
-const express = require('express');
-
-// create ExpressJS router
-const router = express.Router();
+const express = require('express'); // for access to ExpressJS router
+const router = express.Router(); // create ExpressJS router
 
 // users controller actions
-const usersController = require("../controllers/users-controller");
+const usersController = require('../controllers/users-controller');
+const Auth = require('../helpers/auth-helpers');
 
 /**
  */
@@ -83,7 +81,7 @@ router.get("/", (req, res) => {
  *                 error:
  *                   type: string
  */
-router.post("/signup", usersController.signUp);
+router.post("/sign-up", usersController.signUp);
 
 /**
  * @swagger
@@ -138,7 +136,7 @@ router.post("/signup", usersController.signUp);
  *                 error:
  *                   type: string
  */
-router.post("/signin", usersController.signIn);
+router.post("/sign-in", usersController.signIn);
 
 // forgot-password page request
 router.post("/forgot-password", usersController.forgotPassword);

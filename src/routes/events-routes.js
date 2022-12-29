@@ -76,7 +76,7 @@ const eventsController = require("../controllers/events-controller");
  *                 error:
  *                   type: string
  */
-router.post("/addEvent", eventsController.addEvent);
+router.post("/add-event", eventsController.addEvent);
 
 /**
  * @swagger
@@ -116,7 +116,7 @@ router.post("/addEvent", eventsController.addEvent);
  *                   type: string
  *                   description: error message
  */
-router.post("/deleteEvent", eventsController.deleteEvent);
+router.post("/delete-event", eventsController.deleteEvent);
 
 /**
  * @swagger
@@ -165,7 +165,7 @@ router.post("/deleteEvent", eventsController.deleteEvent);
  *                   type: string
  *                   description: error message
  */
-router.post("/updateEvent", eventsController.updateEvent);
+router.post("/update-event", eventsController.updateEvent);
 
 /**
  * @swagger
@@ -204,7 +204,7 @@ router.post("/updateEvent", eventsController.updateEvent);
  *                 error:
  *                   type: string
  */
-router.post("/getEvents", eventsController.getEvents);
+router.post("/get-events", eventsController.getEvents);
 
 // export router to app can use it
 module.exports = router;
