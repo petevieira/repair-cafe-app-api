@@ -16,7 +16,7 @@ const itemTypesController = require("../controllers/item-types-controller");
 
 /**
  * @swagger
- * /events/addItemType:
+ * /events/add-item-type:
  *   post:
  *     summary: Adds an item type document to the database
  *     requestBody:

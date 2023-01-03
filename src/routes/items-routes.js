@@ -16,7 +16,7 @@ const itemsController = require("../controllers/items-controller");
 
 /**
  * @swagger
- * /items/addItem:
+ * /items/add-item:
  *   post:
  *     summary: Adds a new item
  *     requestBody:
@@ -75,7 +75,7 @@ const itemsController = require("../controllers/items-controller");
  *                 error:
  *                   type: string
  */
-router.post("/addItem", itemsController.addItem);
+router.post("/add-item", itemsController.addItem);
 
 /**
  * @swagger
@@ -130,16 +130,16 @@ router.post("/addItem", itemsController.addItem);
  *                 error:
  *                   type: string
  */
-router.post("/deleteItem", itemsController.deleteItem);
+router.post("/delete-item", itemsController.deleteItem);
 
 // forgot-password page request
-router.post("/updateItem", itemsController.updateItem);
+router.post("/update-item", itemsController.updateItem);
 
 // reset-password page request
-router.post("/getItems", itemsController.getItems);
+router.post("/get-items", itemsController.getItems);
 
 // reset-password page request
-router.post("/getItem", itemsController.getItem);
+router.post("/get-item", itemsController.getItem);
 
 // export router to app can use it
 module.exports = router;
