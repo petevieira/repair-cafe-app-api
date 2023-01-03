@@ -28,11 +28,9 @@ sgMail.setApiKey(process.env.SENDGRID_KEY);
  *   or an error
  */
 async function emailIsRegistered(req, res) {
-  console.log("emailIsRegistered was called");
   // Check for required request params
   const result = validateRequest(req.body, ['email']);
   if (result !== true) {
-    console.error("validateRequest failed: ", result);
     return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
   }
 
@@ -47,7 +45,6 @@ async function emailIsRegistered(req, res) {
     } else {
       data = { emailRegistered: false };
     }
-    console.debug("sending success, data: ", data);
     return sendResponse(res, msg, data, StatusCodes.OK);
   } catch (err) {
     console.error(err);
