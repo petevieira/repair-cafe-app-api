@@ -19,6 +19,39 @@ const sgMail = require("@sendgrid/mail"); // for sending emails
 sgMail.setApiKey(process.env.SENDGRID_KEY);
 
 /**
+ * checks if email is registered already
+ * @function
+ * @param {object} req - request object
+ * @param {string} req.body.email - email of user
+ * @param {object} res - response object
+ * @returns {object} response with User object that was created
+ *   or an error
+ */
+async function emailIsRegistered(req, res) {
+  // Check for required request params
+  const result = validateRequest(req.body, ['email']);
+  if (result !== true) {
+    return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
+  }
+
+  const email = req.body.email;
+
+  try {
+    const user = await User.findOne({ email: email });
+    const msg = user ? 'Email is registered' : 'Email is not registered';
+    let data = {};
+    if (user) {
+      data = { emailRegistered: true, user: user };
+    } else {
+      data = { emailRegistered: false };
+    }
+    return sendResponse(res, msg, data, StatusCodes.OK);
+  } catch (err) {
+    return sendResponse(res, err, {}, StatusCodes.INTERNAL_SERVER_ERROR);
+  }
+}
+
+/**
  * signs user up if the request is valid.
  * @function
  * @param {object} req - request object
@@ -216,4 +249,4 @@ async function resetPassword(req, res) {
   }
 }
 
-module.exports = { signUp, signIn, forgotPassword, resetPassword };
+module.exports = { signUp, signIn, forgotPassword, resetPassword, emailIsRegistered };

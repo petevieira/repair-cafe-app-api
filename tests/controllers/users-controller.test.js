@@ -326,3 +326,46 @@ describe('/users/reset-password', () => {
     expect(user.resetCode).toEqual('');
   });
 });
+
+describe('/users/email-is-registered', () => {
+  // test user for requests
+  const testUser = {
+    first: 'john',
+    last: 'smith',
+    email: 'test@gmail.com',
+    password: 'adminpassword'
+  };
+
+  test("should succeed if the email isn't registered, but give false data", async () => {
+    // arrange
+
+    // act
+    const res = await request(app)
+      .post('/users/email-is-registered')
+      .send({ email: testUser.email });
+
+    // assert
+    expect(res.status).toBe(StatusCodes.OK);
+    expect(res.body.data.emailRegistered).toBe(false);
+    expect(res.body.data.user).toBeFalsy();
+  });
+
+  test("should succeed if the email is registered", async () => {
+    // arrange
+    const user = new User(testUser).save();
+
+    // act
+    const res = await request(app)
+      .post('/users/email-is-registered')
+      .send({ email: testUser.email });
+    const data = res.body.data;
+
+    // assert
+    expect(user).toBeTruthy();
+    expect(res.status).toBe(StatusCodes.OK);
+    expect(data.emailRegistered).toBe(true);
+    expect(data.user.email).toEqual(testUser.email);
+    expect(data.user.first).toEqual(testUser.first);
+    expect(data.user.last).toEqual(testUser.last);
+  });
+});

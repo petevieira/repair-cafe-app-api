@@ -22,6 +22,8 @@ router.get("/", async (req, res) => {
   });
 });
 
+router.post("/email-is-registered", usersController.emailIsRegistered);
+
 /**
  * @swagger
  * /users/signup:
