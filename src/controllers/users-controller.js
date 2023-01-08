@@ -41,9 +41,9 @@ async function emailIsRegistered(req, res) {
     const msg = user ? 'Email is registered' : 'Email is not registered';
     let data = {};
     if (user) {
-      data = { emailRegistered: true, user: user };
+      data = { emailIsRegistered: true, user: user };
     } else {
-      data = { emailRegistered: false };
+      data = { emailIsRegistered: false };
     }
     return sendResponse(res, msg, data, StatusCodes.OK);
   } catch (err) {
