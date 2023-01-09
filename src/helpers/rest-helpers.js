@@ -20,9 +20,11 @@ function sendResponse(response, msg='', data={}, statusCode=StatusCodes.OK) {
     throw new Error('sendResponse(): response object invalid');
   }
 
+  const status = (statusCode >= 200 && statusCode < 300);
+
   return response
     .status(statusCode)
-    .json({ msg: msg, data: data });
+    .json({ status: status, msg: msg, data: data });
 }
 
 /**
