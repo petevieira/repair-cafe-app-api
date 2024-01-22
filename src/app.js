@@ -39,8 +39,8 @@ app.use(morgan('dev'));
 
 // use authentication routes for /api/* routes
 app.use('/users', usersRoutes);
-app.use('/events', Auth.authenticateToken, eventsRoutes);
-app.use('/item-types', Auth.authenticateToken, itemTypeRoutes);
+// app.use('/events', Auth.authenticateToken, eventsRoutes);
+// app.use('/item-types', Auth.authenticateToken, itemTypeRoutes);
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // export the app

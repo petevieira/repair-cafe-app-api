@@ -31,10 +31,10 @@ const userSchema = new Schema(
       min: 6,
       max: 64,
     },
-    roles: [{
+    role: {
       type: String,
       default: "user",
-    }],
+    },
     image: {
       public_id: "",
       url: "",

@@ -24,6 +24,8 @@ router.get("/", async (req, res) => {
 
 router.post("/email-is-registered", usersController.emailIsRegistered);
 
+router.post("/email-is-registered-as-admin", usersController.emailIsRegisteredAsAdmin);
+
 /**
  * @swagger
  * /users/signup:
@@ -141,6 +143,8 @@ router.post("/sign-up", usersController.signUp);
  *                   type: string
  */
 router.post("/sign-in", usersController.signIn);
+
+router.post("/sign-in-admin", usersController.signInAdmin);
 
 // forgot-password page request
 router.post("/forgot-password", usersController.forgotPassword);

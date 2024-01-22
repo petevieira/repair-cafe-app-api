@@ -52,6 +52,37 @@ async function emailIsRegistered(req, res) {
   }
 }
 
+async function emailIsRegisteredAsAdmin(req, res) {
+  // Check for required request params
+  const result = validateRequest(req.body, ['email']);
+  if (result !== true) {
+    return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
+  }
+
+  const email = req.body.email;
+
+  try {
+    const user = await User.findOne({ email: email });
+    console.debug("user: ", user);
+    console.debug(`user.last: (${user.last})`);
+    console.debug(`user.role: (${user.role})`);
+    let msg = "User is an admin";
+    let statusCode = StatusCodes.OK;
+    if (!user) {
+      msg = "Email is not registered";
+      statusCode = StatusCodes.BAD_REQUEST;
+    } else if (user.role !== "admin") {
+      msg = "User isn't an admin";
+      statusCode = StatusCodes.BAD_REQUEST;
+    }
+    console.debug("statusCode: ", statusCode);
+    return sendResponse(res, msg, {}, statusCode);
+  } catch (err) {
+    console.error(err);
+    return sendResponse(res, err, {}, StatusCodes.INTERNAL_SERVER_ERROR);
+  }
+}
+
 /**
  * signs user up if the request is valid.
  * @function
@@ -131,6 +162,47 @@ async function signIn(req, res) {
     const user = await User.findOne({ email: email });
     if (!user) {
       return sendResponse(res, 'No user found', {}, StatusCodes.BAD_REQUEST);
+    }
+
+    // check password
+    const match = await Auth.comparePassword(password, user.password);
+    if (!match) {
+      return sendResponse(res, 'Wrong password', {}, StatusCodes.BAD_REQUEST);
+    }
+
+    // create signed token
+    const token = await Auth.createSignedToken(user._id);
+
+    // get rid of sensitive info for security
+    user.password = undefined;
+    user.secret = undefined;
+
+    // return success with token and created user object
+    return sendResponse(res, 'User successfully signed in', { token, user });
+  } catch (err) {
+    console.error(err);
+    return sendResponse(res, err, {}, StatusCodes.BAD_REQUEST);
+  }
+}
+
+async function signInAdmin(req, res) {
+  // Check for required request params
+  const result = validateRequest(req.body, ['email', 'password']);
+  if (result !== true) {
+    return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
+  }
+
+  try {
+    const { email, password } = req.body;
+
+    // check if our db has user with that email
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      return sendResponse(res, 'No user found', {}, StatusCodes.BAD_REQUEST);
+    }
+
+    if (user.role !== "admin") {
+      return sendResponse(res, 'User not admin', {}, StatusCodes.UNAUTHORIZED);
     }
 
     // check password
@@ -250,4 +322,4 @@ async function resetPassword(req, res) {
   }
 }
 
-module.exports = { signUp, signIn, forgotPassword, resetPassword, emailIsRegistered };
+module.exports = { signUp, signIn, signInAdmin, forgotPassword, resetPassword, emailIsRegistered, emailIsRegisteredAsAdmin };
