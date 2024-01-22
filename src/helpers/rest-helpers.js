@@ -61,4 +61,9 @@ function validateRequest(requestBody, requiredParams) {
   return objectHasRequiredProperties(requestBody, requiredParams, 'request');
 }
 
-module.exports = { sendResponse, objectHasRequiredProperties, validateRequest };
+function toLowerCapFirstLetter(str) {
+  let newStr = str.toLowerCase();
+  return (newStr.charAt(0).toUpperCase() + newStr.slice(1));
+}
+
+module.exports = { sendResponse, objectHasRequiredProperties, validateRequest, toLowerCapFirstLetter };

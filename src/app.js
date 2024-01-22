@@ -17,8 +17,8 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./swagger-jsdoc'); // swagger jsdoc
 const database = require('./database/database-config'); // database connection
 const usersRoutes = require('./routes/users-routes'); // users routes
-const eventsRoutes = require('./routes/events-routes'); // events routes
-const itemTypeRoutes = require('./routes/item-types-routes'); // item-type routes
+const itemsRoutes = require('./routes/items-routes');
+const volunteersRoutes = require('./routes/volunteers-routes');
 const Auth = require('./helpers/auth-helpers'); // authentication helpers
 
 // create our ExpressJS app
@@ -39,8 +39,8 @@ app.use(morgan('dev'));
 
 // use authentication routes for /api/* routes
 app.use('/users', usersRoutes);
-// app.use('/events', Auth.authenticateToken, eventsRoutes);
-// app.use('/item-types', Auth.authenticateToken, itemTypeRoutes);
+app.use('/volunteers', volunteersRoutes);
+app.use('/items', itemsRoutes);
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // export the app

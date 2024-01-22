@@ -5,12 +5,25 @@
  * @requires jsonwebtoken
  */
 
-const bcrypt = require('bcrypt'); // for hashing user passwords
-const jwt = require('jsonwebtoken'); // for JSON Web Token helpers
-const { sendResponse } = require('../helpers/rest-helpers'); // validator
-const { StatusCodes } = require('http-status-codes'); // for HTTP status codes
+// for hashing user passwords
+const bcrypt = require('bcrypt');
+// for JSON Web Token helpers
+const jwt = require('jsonwebtoken');
+// for token checking
+const expressJwt = require('express-jwt');
+// validator
+const { sendResponse } = require('../helpers/rest-helpers');
+// for HTTP status codes
+const { StatusCodes } = require('http-status-codes');
 
 class Auth {
+
+static requiresSignin = function() {
+  return expressJwt({
+    secret: process.env.JWT_SECRET,
+    algorithms: ['HS256']
+  });
+}
 
 /**
  * created a signed JSON Web Token
@@ -66,7 +79,7 @@ static authenticateToken = async function(req, res, next) {
     req.userId = decodedPayload._id;
     next(); // redirect back to requested endpoint
   } catch (err) {
-    console.error("authicateToken() error: ", err.message);
+    console.error("error in authenticateToken(): ", err.message);
     return sendResponse(res, err.message, {}, StatusCodes.FORBIDDEN);
   }
 }

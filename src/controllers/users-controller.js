@@ -217,6 +217,7 @@ async function signInAdmin(req, res) {
     // get rid of sensitive info for security
     user.password = undefined;
     user.secret = undefined;
+    user.resetCode = undefined;
 
     // return success with token and created user object
     return sendResponse(res, 'User successfully signed in', { token, user });

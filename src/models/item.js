@@ -9,52 +9,63 @@ const { Schema } = mongoose;
 // create item schema
 const itemSchema = new Schema(
   {
-    type: {
-      typeId: Schema.Types.ObjectId,
-      ref: 'ItemType',
+    ownersEmail: {
+      $type: String,
+      trim: true,
       required: true,
     },
-    make: {
-      type: String,
+    ownersFirstName: {
+      $type: String,
+      trim: true,
+      required: true,
+    },
+    ownersLastName: {
+      $type: String,
+      trim: true,
+      required: true,
+    },
+    type: {
+      $type: String,
+      trim: true,
+      required: true,
+    },
+    brand: {
+      $type: String,
       trim: true
     },
     model: {
-      type: String
+      $type: String,
+      trim: true,
     },
     symptoms: {
-      type: String,
+      $type: String,
+      trim: true,
     },
-    possibleCauses: {
-      type: String
+    notes: {
+      $type: String,
+      trim: true,
     },
-    repairDetails: {
-      type: String,
+    repairerFirstName: {
+      $type: String,
+      trim: true,
+    },
+    repairerLastName: {
+      $type: String,
+      trim: true,
     },
     status: {
-      type: String,
+      $type: String,
+      trim: true,
     },
     imagesUrls: [{
-      type: String
+      $type: String
     }],
-    ownerId: {
-      type: Schema.Type.ObjectId,
-      ref: 'User',
-      required: true
-    },
-    primaryRepairerId: {
-      type: Schema.Type.ObjectId,
-      ref: 'User'
-    },
-    eventIds: [{
-      type: Schema.Type.ObjectId,
-      ref: 'Event',
-      required: true
-    }]
   },
   {
+    typeKey: '$type',
     timestamps: true
   }
 );
 
 // export the user model for use in the app
-export default mongoose.model("Item", itemSchema);
+module.exports = mongoose.model("Item", itemSchema);
