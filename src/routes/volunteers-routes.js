@@ -1,8 +1,8 @@
 
 const express = require('express'); // for access to ExpressJS router
 const volunteersController = require('../controllers/volunteers-controller');
-const Auth = require('../helpers/auth-helpers');
-const Volunteer = require('../models/volunteer');
+const { authenticateToken, isAdmin, requireSignin } = require('../middleware');
+const { expressjwt } = require('express-jwt');
 
 // create ExpressJS router
 const router = express.Router();
@@ -15,12 +15,25 @@ const router = express.Router();
  * 2024-01-02T07:00:00.000Z // start of Jan 2nd in Arizona in UTC time
  */
 router.get("/get-days-volunteers/:date",
-  volunteersController.getDaysVolunteers);
+  volunteersController.getDaysVolunteers
+);
 router.post("/add-volunteer",
-  Auth.authenticateToken, volunteersController.addVolunteer);
+  authenticateToken,
+  requireSignin,
+  isAdmin,
+  volunteersController.addVolunteer
+);
 router.delete("/delete-volunteer/:id",
-  Auth.authenticateToken, volunteersController.deleteVolunteer);
+  authenticateToken,
+  requireSignin,
+  isAdmin,
+  volunteersController.deleteVolunteer
+);
 router.put("/update-volunteer",
-  Auth.authenticateToken, volunteersController.updateVolunteer);
+  authenticateToken,
+  requireSignin,
+  isAdmin,
+  volunteersController.updateVolunteer
+);
 
 module.exports = router;

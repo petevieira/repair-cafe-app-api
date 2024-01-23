@@ -19,7 +19,6 @@ const database = require('./database/database-config'); // database connection
 const usersRoutes = require('./routes/users-routes'); // users routes
 const itemsRoutes = require('./routes/items-routes');
 const volunteersRoutes = require('./routes/volunteers-routes');
-const Auth = require('./helpers/auth-helpers'); // authentication helpers
 
 // create our ExpressJS app
 const app = express();

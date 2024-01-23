@@ -7,8 +7,6 @@
 
 const express = require('express'); // for access to ExpressJS router
 const usersController = require('../controllers/users-controller');
-const Auth = require('../helpers/auth-helpers');
-const User = require('../models/user'); // import User model
 
 const router = express.Router(); // create ExpressJS router
 

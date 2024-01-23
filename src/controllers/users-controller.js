@@ -10,7 +10,7 @@
 const nanoid = require('nanoid'); // to generate unique reset code
 const { StatusCodes } = require('http-status-codes'); // for HTTP status codes
 const User = require('../models/user'); // import User model
-const Auth = require('../helpers/auth-helpers'); // password helpers
+const { comparePassword, createSignedToken } = require('../helpers/auth-helpers'); // password helpers
 const { sendResponse, validateRequest } = require('../helpers/rest-helpers'); // validator
 require("dotenv").config(); // parse .env file
 const sgMail = require("@sendgrid/mail"); // for sending emails
@@ -60,21 +60,25 @@ async function signInAdmin(req, res) {
     // check if our db has user with that email
     const user = await User.findOne({ email: email });
     if (!user) {
-      return sendResponse(res, 'No user found', {}, StatusCodes.BAD_REQUEST);
+      return sendResponse(
+        res, `No user found with email ${email}`, {}, StatusCodes.BAD_REQUEST
+      );
     }
 
     if (user.role !== "admin") {
-      return sendResponse(res, 'User not admin', {}, StatusCodes.UNAUTHORIZED);
+      return sendResponse(
+        res, `User with email ${email} not admin`, {}, StatusCodes.UNAUTHORIZED
+      );
     }
 
     // check password
-    const match = await Auth.comparePassword(password, user.password);
+    const match = await comparePassword(password, user.password);
     if (!match) {
       return sendResponse(res, 'Wrong password', {}, StatusCodes.BAD_REQUEST);
     }
 
     // create signed token
-    const token = await Auth.createSignedToken(user._id);
+    const token = await createSignedToken(user._id);
 
     // get rid of sensitive info for security
     user.password = undefined;
