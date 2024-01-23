@@ -10,12 +10,7 @@ const Item = require('../models/item'); // import Item model
 const { sendResponse, validateRequest, toLowerCapFirstLetter } = require('../helpers/rest-helpers');
 
 async function addBasicItem(req, res) {
-  console.debug("req.body.item: ", req.body.item);
-  let result = validateRequest(req.body, ['item']);
-  if (result !== true) {
-    return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
-  }
-	result = validateRequest(req.body.item, [
+	const result = validateRequest(req.body, [
     'ownersEmail', 'ownersFirstName', 'ownersLastName',
     'type', 'symptoms', 'brand', 'model'
   ]);
@@ -27,7 +22,7 @@ async function addBasicItem(req, res) {
   try {
     let {
       ownersEmail, ownersFirstName, ownersLastName,
-      type, symptoms, brand, model
+      type, symptoms, brand, model, acceptsWaiver
     } = req.body.item;
 
     ownersEmail = ownersEmail.toLowerCase();
@@ -41,7 +36,8 @@ async function addBasicItem(req, res) {
       type,
       symptoms,
       brand,
-      model
+      model,
+      acceptsWaiver
     }).save();
     console.debug("new item: ", item)
     return sendResponse(res, "Basic item created", { item: item });
@@ -54,7 +50,7 @@ async function addFullItem(req, res) {
   const result = validateRequest(req.body, [
     'ownersEmail', 'ownersFirstName', 'ownersLastName', 'type',
     'symptoms', 'brand', 'model', 'repairerFirstName',
-    'repairerLastName', 'notes', 'status'
+    'repairerLastName', 'notes', 'status', 'acceptsWaiver'
   ]);
 
   if (result !== true) {
@@ -64,7 +60,8 @@ async function addFullItem(req, res) {
   try {
     let {
       acceptsWaiver, ownersEmail, ownersFirstName, ownersLastName,
-      type, symptoms, brand, model, repairerFirstName, repairerLastName, notes, status
+      type, symptoms, brand, model, repairerFirstName, repairerLastName,
+      notes, status
     } = req.body;
     ownersEmail = ownersEmail.toLowerCase();
     ownersFirstName = toLowerCapFirstLetter(ownersFirstName);
@@ -97,17 +94,19 @@ async function updateItem(req, res) {
   const result = validateRequest(req.body, [
     'ownersEmail', 'ownersFirstName', 'ownersLastName', 'type',
     'symptoms', 'brand', 'model', 'repairerFirstName',
-    'repairerLastName', 'notes', 'status', 'id'
+    'repairerLastName', 'notes', 'status', '_id', 'acceptsWaiver'
   ]);
+  console.log("[updateItem] data: ", req.body);
 
   if (result !== true) {
+    console.debug("result: ", result);
     return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
   }
 
   try {
     let {
-      id, acceptsWaiver, ownersEmail, ownersFirstName, ownersLastName,
-      type, symptoms, brand, model, repairerFirstName, repairerLastName, notes, status
+      _id, acceptsWaiver, ownersEmail, ownersFirstName, ownersLastName, notes,
+      type, symptoms, brand, model, repairerFirstName, repairerLastName, status
     } = req.body;
     ownersEmail = ownersEmail.toLowerCase();
     ownersFirstName = toLowerCapFirstLetter(ownersFirstName);
@@ -116,7 +115,7 @@ async function updateItem(req, res) {
     repairerLastName = toLowerCapFirstLetter(repairerLastName);
 
     const originalItem = await Item.findOneAndUpdate(
-      { _id: id },
+      { _id: _id },
       {
         acceptsWaiver,
         ownersEmail,
@@ -132,9 +131,10 @@ async function updateItem(req, res) {
         status
       }
     );
-    const updatedItem = await Item.findOne({ _id: id });
-
-    return sendResponse(res, `Item (${id}) updated`, { item: updatedItem });
+    console.log("now get updated item");
+    const updatedItem = await Item.findById(_id);
+    console.log("updatedItem: ", updatedItem);
+    return sendResponse(res, `Item (${_id}) updated`, { item: updatedItem });
   } catch (error) {
     console.error(error);
   }
@@ -152,7 +152,7 @@ async function getItem(req, res) {
   const id = req.params.id;
 
   try {
-    const item = Item.findOne({ _id: id });
+    const item = await Item.findById(id);
     if (!item) {
       return sendResponse(
         res, `No item found with id ${id}`, {}, StatusCodes.BAD_REQUEST

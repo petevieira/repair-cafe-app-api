@@ -9,6 +9,11 @@ const { Schema } = mongoose;
 // create item schema
 const itemSchema = new Schema(
   {
+    acceptsWaiver: {
+      $type: String,
+      trim: true,
+      required: true,
+    },
     ownersEmail: {
       $type: String,
       trim: true,

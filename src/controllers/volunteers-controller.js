@@ -10,17 +10,17 @@ const {
 async function addVolunteer(req, res) {
   // Check for required request params
   const result = validateRequest(req.body,
-    ['firstName', 'lastName']
+    ['firstName', 'lastName', 'email', 'acceptsWaiver']
   );
   if (result !== true) {
     return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
   }
 
-  const { firstName, lastName } = req.body;
+  const { firstName, lastName, email, acceptsWaiver } = req.body;
 
   try {
     const volunteer = await new Volunteer({
-      firstName, lastName
+      firstName, lastName, email, acceptsWaiver
     }).save();
     return sendResponse(res, "Volunteer added", volunteer);
   } catch (err) {
@@ -41,12 +41,13 @@ async function getVolunteer(req, res) {
   const id = req.params.id;
 
   try {
-    const volunteer = Volunteer.findOne({ _id: id });
+    const volunteer = await Volunteer.findById(id);
     if (!volunteer) {
       return sendResponse(
         res, `No volunteer found with id ${id}`, {}, StatusCodes.BAD_REQUEST
       );
     }
+    console.debug("volunteer: ", volunteer);
     return sendResponse(
       res, `Volunteer with id ${id} found`, { volunteer: volunteer }
     );
@@ -85,7 +86,7 @@ async function updateVolunteer(req, res) {
   }
 
   try {
-    let { id, firstName, lastName } = req.body;
+    let { id, firstName, lastName, email, acceptsWaiver } = req.body;
     firstName = toLowerCapFirstLetter(firstName);
     lastName = toLowerCapFirstLetter(lastName);
 
@@ -93,7 +94,9 @@ async function updateVolunteer(req, res) {
       { _id: id },
       {
         firstName,
-        lastName
+        lastName,
+        email,
+        acceptsWaiver
       }
     );
     const updatedVolunteer = await Volunteer.findOne({ _id: id });

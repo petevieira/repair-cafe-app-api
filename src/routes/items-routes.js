@@ -44,6 +44,9 @@ router.get("/get-items-basic/:date",
 );
 
 router.get("/get-item/:id",
+  authenticateToken,
+  requireSignin,
+  isAdmin,
   itemsController.getItem
 );
 

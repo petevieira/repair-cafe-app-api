@@ -18,6 +18,15 @@ const volunteerSchema = new Schema(
       type: String,
       trim: true,
       required: true,
+    },
+    email: {
+      type: String,
+      trim: true,
+      required: false,
+    },
+    acceptsWaiver: {
+      type: Boolean,
+      required: true,
     }
   },
   {
