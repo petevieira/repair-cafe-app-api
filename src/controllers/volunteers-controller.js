@@ -29,6 +29,32 @@ async function addVolunteer(req, res) {
   }
 }
 
+async function getVolunteer(req, res) {
+  const result = validateRequest(req.params, ['id']);
+  if (result !== true) {
+    return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
+  }
+  if (req.params.id.trim() === "") {
+    return sendResponse(res, "id empty", {}, StatusCodes.BAD_REQUEST);
+  }
+
+  const id = req.params.id;
+
+  try {
+    const volunteer = Volunteer.findOne({ _id: id });
+    if (!volunteer) {
+      return sendResponse(
+        res, `No volunteer found with id ${id}`, {}, StatusCodes.BAD_REQUEST
+      );
+    }
+    return sendResponse(
+      res, `Volunteer with id ${id} found`, { volunteer: volunteer }
+    );
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 async function deleteVolunteer(req, res) {
   // Check for required request params
   const result = validateRequest(req.params, ['id']);
@@ -104,20 +130,15 @@ async function getDaysVolunteers(req, res) {
         $project: {
           _id: 1,
           firstName: 1,
-          lastName: {
-            $ifNull: [
-              { $concat: [{ $toUpper: { $substrCP: ['$lastName', 0, 1] } }, '.'] },
-              ''
-            ]
-          }
+          lastName: 1
         }
       }
     ]);
-    return sendResponse(res, `Found ${volunteers.length} volunteer(s)`, volunteers);
+    return sendResponse(res, `Found ${volunteers.length} volunteer(s)`, { volunteers: volunteers });
   } catch (err) {
     console.error(err);
     return sendResponse(res, err, {}, StatusCodes.INTERNAL_SERVER_ERROR);
   }
 }
 
-module.exports = { addVolunteer, updateVolunteer, deleteVolunteer, getDaysVolunteers };
+module.exports = { addVolunteer, updateVolunteer, deleteVolunteer, getDaysVolunteers, getVolunteer };

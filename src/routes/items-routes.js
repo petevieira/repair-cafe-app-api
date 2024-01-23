@@ -43,4 +43,8 @@ router.get("/get-items-basic/:date",
   itemsController.getItemsBasic
 );
 
+router.get("/get-item/:id",
+  itemsController.getItem
+);
+
 module.exports = router;

@@ -17,23 +17,33 @@ const router = express.Router();
 router.get("/get-days-volunteers/:date",
   volunteersController.getDaysVolunteers
 );
+
 router.post("/add-volunteer",
   authenticateToken,
   requireSignin,
   isAdmin,
   volunteersController.addVolunteer
 );
+
 router.delete("/delete-volunteer/:id",
   authenticateToken,
   requireSignin,
   isAdmin,
   volunteersController.deleteVolunteer
 );
+
 router.put("/update-volunteer",
   authenticateToken,
   requireSignin,
   isAdmin,
   volunteersController.updateVolunteer
+);
+
+router.get("/get-volunteer/:id",
+  authenticateToken,
+  requireSignin,
+  isAdmin,
+  volunteersController.getVolunteer
 );
 
 module.exports = router;

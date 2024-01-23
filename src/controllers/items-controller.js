@@ -10,7 +10,12 @@ const Item = require('../models/item'); // import Item model
 const { sendResponse, validateRequest, toLowerCapFirstLetter } = require('../helpers/rest-helpers');
 
 async function addBasicItem(req, res) {
-	const result = validateRequest(req.body, [
+  console.debug("req.body.item: ", req.body.item);
+  let result = validateRequest(req.body, ['item']);
+  if (result !== true) {
+    return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
+  }
+	result = validateRequest(req.body.item, [
     'ownersEmail', 'ownersFirstName', 'ownersLastName',
     'type', 'symptoms', 'brand', 'model'
   ]);
@@ -23,7 +28,7 @@ async function addBasicItem(req, res) {
     let {
       ownersEmail, ownersFirstName, ownersLastName,
       type, symptoms, brand, model
-    } = req.body;
+    } = req.body.item;
 
     ownersEmail = ownersEmail.toLowerCase();
     ownersFirstName = toLowerCapFirstLetter(ownersFirstName);
@@ -38,7 +43,7 @@ async function addBasicItem(req, res) {
       brand,
       model
     }).save();
-
+    console.debug("new item: ", item)
     return sendResponse(res, "Basic item created", { item: item });
   } catch (error) {
     console.error(error);
@@ -135,7 +140,32 @@ async function updateItem(req, res) {
   }
 }
 
+async function getItem(req, res) {
+  const result = validateRequest(req.params, ['id']);
+  if (result !== true) {
+    return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
+  }
+  if (req.params.id.trim() === "") {
+    return sendResponse(res, "id empty", {}, StatusCodes.BAD_REQUEST);
+  }
+
+  const id = req.params.id;
+
+  try {
+    const item = Item.findOne({ _id: id });
+    if (!item) {
+      return sendResponse(
+        res, `No item found with id ${id}`, {}, StatusCodes.BAD_REQUEST
+      );
+    }
+    return sendResponse(res, `Item with id ${id} found`, { item: item });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 async function getItemsBasic(req, res) {
+  console.debug("[getItemsBasic] req.params: ", req.params);
   const result = validateRequest(req.params, ['date']);
   if (result !== true) {
     return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
@@ -177,12 +207,9 @@ async function getItemsBasic(req, res) {
         }
       }
     ]);
-    return sendResponse(res, `Found ${items.length} item(s)`, items);
+    return sendResponse(res, `Found ${items.length} item(s)`, { items: items });
   } catch (error) {
     console.error(error);
-    return sendResponse(
-      res, "Internal server error", {}, StatusCodes.INTERNAL_SERVER_ERROR
-    );
   }
 }
 
@@ -209,4 +236,4 @@ async function deleteItem(req, res) {
   }
 }
 
-module.exports = { addBasicItem, addFullItem, getItemsBasic, deleteItem, updateItem };
+module.exports = { addBasicItem, addFullItem, getItemsBasic, deleteItem, updateItem, getItem };
