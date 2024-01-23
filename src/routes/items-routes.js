@@ -6,21 +6,18 @@
  */
 
 // for access to ExpressJS router
-const express = require('express');
+const express = require('express'); // for access to ExpressJS router
+const itemsController = require("../controllers/items-controller");
+const Auth = require('../helpers/auth-helpers');
 
 // create ExpressJS router
 const router = express.Router();
 
-// items controller actions
-const itemsController = require("../controllers/items-controller");
-const Auth = require('../helpers/auth-helpers');
-
+// define /items/* routes
 router.post("/add-basic-item", itemsController.addBasicItem);
-router.post("/add-full-item", itemsController.addFullItem);
-router.post("/delete-item", itemsController.deleteItem);
-router.post("/update-item", itemsController.updateItem);
-router.post("/get-items-basic", itemsController.getItemsBasic);
-// router.post("/get-items-full", itemsController.getItemFull);
+router.post("/add-full-item", Auth.authenticateToken, itemsController.addFullItem);
+router.delete("/delete-item/:id", Auth.authenticateToken, itemsController.deleteItem);
+router.put("/update-item", Auth.authenticateToken, itemsController.updateItem);
+router.get("/get-items-basic/:date", itemsController.getItemsBasic);
 
-// export router to app can use it
 module.exports = router;

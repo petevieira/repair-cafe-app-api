@@ -110,7 +110,7 @@ async function updateItem(req, res) {
     repairerFirstName = toLowerCapFirstLetter(repairerFirstName);
     repairerLastName = toLowerCapFirstLetter(repairerLastName);
 
-    const item = await Item.findOneAndUpdate(
+    const originalItem = await Item.findOneAndUpdate(
       { _id: id },
       {
         acceptsWaiver,
@@ -127,21 +127,22 @@ async function updateItem(req, res) {
         status
       }
     );
+    const updatedItem = await Item.findOne({ _id: id });
 
-    return sendResponse(res, `Item (${id}) updated`, { item: item });
+    return sendResponse(res, `Item (${id}) updated`, { item: updatedItem });
   } catch (error) {
     console.error(error);
   }
 }
 
 async function getItemsBasic(req, res) {
-  const result = validateRequest(req.body, ['date']);
+  const result = validateRequest(req.params, ['date']);
   if (result !== true) {
     return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
   }
 
-  const date = new Date(req.body.date);
-  let datePlus24h = new Date(req.body.date);
+  const date = new Date(req.params.date);
+  let datePlus24h = new Date(req.params.date);
   datePlus24h.setDate(date.getDate() + 1);
 
   try {
@@ -176,7 +177,6 @@ async function getItemsBasic(req, res) {
         }
       }
     ]);
-    console.debug("items: ", items);
     return sendResponse(res, `Found ${items.length} item(s)`, items);
   } catch (error) {
     console.error(error);
@@ -188,22 +188,21 @@ async function getItemsBasic(req, res) {
 
 async function deleteItem(req, res) {
   // Check for required request params
-  const result = validateRequest(req.body, ['id']);
+  const result = validateRequest(req.params, ['id']);
   if (result !== true) {
     return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
   }
-  if (req.body.id.trim() === "") {
+  if (req.params.id.trim() === "") {
     return sendResponse(res, "id empty", {}, StatusCodes.BAD_REQUEST);
   }
 
-  const { id } = req.body;
-  const initialDocCount = await Item.countDocuments({ _id: id});
+  const { id } = req.params;
 
   try {
     const item = await Item.deleteOne({ _id: id });
-    const finalDocCount = await Item.countDocuments({ _id: id});
-    console.debug(`Count: ${initialDocCount} -> ${finalDocCount}`);
-    return sendResponse(res, `Deleted item ${id}`, item);
+    const msg = item.deletedCount > 0 ? `Item ${id} deleted` : "Item not found";
+    return sendResponse(res, msg, item);
+    return sendResponse(res, msg, item);
   } catch (err) {
     console.error(err);
     return sendResponse(res, err, {}, StatusCodes.INTERNAL_SERVER_ERROR);

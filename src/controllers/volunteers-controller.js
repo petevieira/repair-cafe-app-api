@@ -1,7 +1,11 @@
 
-const { StatusCodes } = require('http-status-codes'); // for HTTP status codes
+const { StatusCodes } = require('http-status-codes');
 const Volunteer = require('../models/volunteer');
-const { sendResponse, validateRequest } = require('../helpers/rest-helpers'); // validator
+const {
+  sendResponse,
+  validateRequest,
+  toLowerCapFirstLetter
+} = require('../helpers/rest-helpers');
 
 async function addVolunteer(req, res) {
   // Check for required request params
@@ -27,34 +31,63 @@ async function addVolunteer(req, res) {
 
 async function deleteVolunteer(req, res) {
   // Check for required request params
-  const result = validateRequest(req.body, ['id']);
+  const result = validateRequest(req.params, ['id']);
   if (result !== true) {
     return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
   }
 
-  const { id } = req.body;
-  const initialDocCount = await Volunteer.countDocuments({ _id: id});
-
   try {
+    const id = req.params.id;
     const volunteer = await Volunteer.deleteOne({ _id: id });
-    const finalDocCount = await Volunteer.countDocuments({ _id: id});
-    console.debug(`Count: ${initialDocCount} -> ${finalDocCount}`);
-    return sendResponse(res, "Volunteer added", volunteer);
+    const msg = volunteer.deletedCount > 0 ? `Volunteer ${id} deleted` : "Volunteer not found";
+    return sendResponse(res, msg, volunteer);
   } catch (err) {
     console.error(err);
     return sendResponse(res, err, {}, StatusCodes.INTERNAL_SERVER_ERROR);
   }
 }
 
-async function getDaysVolunteers(req, res) {
-  // Check for required request params
-  const result = validateRequest(req.body, ['date']);
+async function updateVolunteer(req, res) {
+  const result = validateRequest(req.body, [
+    'id', 'firstName', 'lastName'
+  ]);
   if (result !== true) {
     return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
   }
+  if (req.body.id === '') {
+    return sendResponse(res, "id is empty", {}, StatusCodes.BAD_REQUEST);
+  }
 
-  const date = new Date(req.body.date);
-  let datePlus24h = new Date(req.body.date);
+  try {
+    let { id, firstName, lastName } = req.body;
+    firstName = toLowerCapFirstLetter(firstName);
+    lastName = toLowerCapFirstLetter(lastName);
+
+    const originalVolunteer = await Volunteer.findOneAndUpdate(
+      { _id: id },
+      {
+        firstName,
+        lastName
+      }
+    );
+    const updatedVolunteer = await Volunteer.findOne({ _id: id });
+
+    return sendResponse(
+      res, `Volunteer (${id}) updated`, { volunteer: updatedVolunteer }
+    );
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function getDaysVolunteers(req, res) {
+  // Check for required request params
+  const result = validateRequest(req.params, ['date']);
+  if (result !== true) {
+    return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
+  }
+  const date = new Date(req.params.date);
+  let datePlus24h = new Date(req.params.date);
   datePlus24h.setDate(date.getDate() + 1);
 
   try {
@@ -87,4 +120,4 @@ async function getDaysVolunteers(req, res) {
   }
 }
 
-module.exports = { addVolunteer, deleteVolunteer, getDaysVolunteers };
+module.exports = { addVolunteer, updateVolunteer, deleteVolunteer, getDaysVolunteers };
