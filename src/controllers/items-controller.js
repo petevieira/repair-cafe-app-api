@@ -39,7 +39,6 @@ async function addBasicItem(req, res) {
       model,
       acceptsWaiver
     }).save();
-    console.debug("new item: ", item)
     return sendResponse(res, "Basic item created", { item: item });
   } catch (error) {
     console.error(error);
@@ -96,10 +95,8 @@ async function updateItem(req, res) {
     'symptoms', 'brand', 'model', 'repairerFirstName',
     'repairerLastName', 'notes', 'status', '_id', 'acceptsWaiver'
   ]);
-  console.log("[updateItem] data: ", req.body);
 
   if (result !== true) {
-    console.debug("result: ", result);
     return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
   }
 
@@ -131,9 +128,7 @@ async function updateItem(req, res) {
         status
       }
     );
-    console.log("now get updated item");
     const updatedItem = await Item.findById(_id);
-    console.log("updatedItem: ", updatedItem);
     return sendResponse(res, `Item (${_id}) updated`, { item: updatedItem });
   } catch (error) {
     console.error(error);
@@ -165,7 +160,6 @@ async function getItem(req, res) {
 }
 
 async function getItemsBasic(req, res) {
-  console.debug("[getItemsBasic] req.params: ", req.params);
   const result = validateRequest(req.params, ['date']);
   if (result !== true) {
     return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
