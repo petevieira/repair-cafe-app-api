@@ -223,8 +223,7 @@ async function deleteItem(req, res) {
     const item = await Item.deleteOne({ _id: id });
     const msg = item.deletedCount > 0 ? `Item ${id} deleted` : "Item not found";
     return sendResponse(res, msg, item);
-    return sendResponse(res, msg, item);
-  } catch (err) {
+   } catch (err) {
     console.error(err);
     return sendResponse(res, err, {}, StatusCodes.INTERNAL_SERVER_ERROR);
   }

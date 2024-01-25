@@ -50,4 +50,11 @@ router.get("/get-item/:id",
   itemsController.getItem
 );
 
+router.delete("/delete-item/:id",
+  authenticateToken,
+  requireSignin,
+  isAdmin,
+  itemsController.deleteItem
+);
+
 module.exports = router;
