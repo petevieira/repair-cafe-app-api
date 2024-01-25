@@ -23,7 +23,7 @@ async function addBasicItem(req, res) {
     let {
       ownersEmail, ownersFirstName, ownersLastName,
       type, symptoms, brand, model, acceptsWaiver
-    } = req.body.item;
+    } = req.body;
 
     ownersEmail = ownersEmail.toLowerCase();
     ownersFirstName = toLowerCapFirstLetter(ownersFirstName);
