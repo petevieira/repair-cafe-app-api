@@ -8,8 +8,8 @@
 // const https = require('https'); // for secure HTTPS
 const process = require('process'); // for uncaught exceptions
 
-const app = require('./app'); // get our ExpressJS app
-const database = require('./database/database-config'); // database connection
+const app = require('./src/app'); // get our ExpressJS app
+const database = require('./src/database/database-config'); // database connection
 
 /* Catch uncaught exceptions and exit app */
 process.on("uncaughtException", err => {
