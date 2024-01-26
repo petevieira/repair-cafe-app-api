@@ -36,3 +36,9 @@ Unit tests are written using the Jest JavaScript testing framework.
 1. 80 character line limit
 1. Functions should ideally be less than 40 lines
 1. All functions and data types must be commented using JSDoc format, including at least description, parameters, returns
+
+## Deploying
+- We deploy in a Docker image. To build the image run
+`docker build -t trc-api .`
+- To run the app in the image, run
+`docker run --interactive --tty --publish 3000:3000 trc-api`
