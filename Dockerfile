@@ -2,9 +2,10 @@
 
 FROM node:16.20.0
 WORKDIR /app
-COPY . .
+COPY package*.json ./
 EXPOSE 3000
-RUN npm install -g nodemon
-RUN npm install --omit=dev
+RUN npm install pm2 -g
+RUN npm install
+COPY src ./
+COPY .env ./
 CMD ["npm", "run", "start:prod"]
-EXPOSE 3000

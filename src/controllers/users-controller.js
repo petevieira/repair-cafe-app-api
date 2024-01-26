@@ -13,10 +13,10 @@ const User = require('../models/user'); // import User model
 const { comparePassword, createSignedToken } = require('../helpers/auth-helpers'); // password helpers
 const { sendResponse, validateRequest } = require('../helpers/rest-helpers'); // validator
 require("dotenv").config(); // parse .env file
-const sgMail = require("@sendgrid/mail"); // for sending emails
+// const sgMail = require("@sendgrid/mail"); // for sending emails
 
 // configure SendGrid email API
-sgMail.setApiKey(process.env.SENDGRID_KEY);
+// sgMail.setApiKey(process.env.SENDGRID_KEY);
 
 async function userIsAdmin(req, res) {
   // Check for required request params
