@@ -47,7 +47,6 @@ async function getVolunteer(req, res) {
         res, `No volunteer found with id ${id}`, {}, StatusCodes.BAD_REQUEST
       );
     }
-    console.debug("volunteer: ", volunteer);
     return sendResponse(
       res, `Volunteer with id ${id} found`, { volunteer: volunteer }
     );

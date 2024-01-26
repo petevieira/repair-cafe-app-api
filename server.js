@@ -18,7 +18,6 @@ process.on("uncaughtException", err => {
   process.exit(1);
 });
 
-
 // read in key and certification for secure HTTP using Open SSL
 // var key = fs.readFileSync(__dirname + "/../ssl-certs/selfsigned.key");
 // var cert = fs.readFileSync(__dirname + "/../ssl-certs/selfsigned.crt");
@@ -46,7 +45,6 @@ function handleSignal(signal) {
   server.close(async () => {
     console.log('Server closed');
   });
-
 }
 
 // handle Interrupt and Terminate signals on command-line

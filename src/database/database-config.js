@@ -34,7 +34,7 @@ if (process.env.NODE_ENV === 'production') {
  * connects to database
  */
 async function connect() {
-  console.debug(
+  console.log(
     `Connecting in ${process.env.NODE_ENV} mode to real MongoDB cluster...`
   );
   try {

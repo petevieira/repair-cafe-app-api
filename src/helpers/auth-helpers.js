@@ -15,7 +15,7 @@ const jwt = require('jsonwebtoken');
  * @param {string} id - ID of user
  * @returns {object} JSON Web Token that was created
  */
-export const createSignedToken = (userId) => {
+const createSignedToken = (userId) => {
   return jwt.sign(
     { _id: userId },
     process.env.JWT_SECRET,
@@ -32,7 +32,7 @@ export const createSignedToken = (userId) => {
  * @param {string} password - user password, unhashed
  * @returns {Promise} promise gives hashed password, otherwise error object
  */
-export const hashPassword = (password) => {
+const hashPassword = (password) => {
   return new Promise((resolve, reject) => {
     bcrypt.genSalt(12, (err, salt) => {
       if (err) {
@@ -54,6 +54,8 @@ export const hashPassword = (password) => {
  * @param {string} hashed - hashed password to compare password to
  * @returns {bool} true if the same, false if different
  */
-export const comparePassword = (password, hashed) => {
+const comparePassword = (password, hashed) => {
   return bcrypt.compare(password, hashed);
 }
+
+module.exports = { createSignedToken, hashPassword, comparePassword };

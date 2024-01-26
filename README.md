@@ -42,3 +42,9 @@ Unit tests are written using the Jest JavaScript testing framework.
 `docker build -t trc-api .`
 - To run the app in the image, run
 `docker run --interactive --tty --publish 3000:3000 trc-api`
+
+### Deploying image to AWS ECR
+- For this you'll need the AWS Command Line Interface (CLI). You can download and install it for all users with these two commands. (see [here](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) for more info)
+- `curl "https://awscli.amazonaws.com/AWSCLIV2.pkg" -o "AWSCLIV2.pkg"`
+- `sudo installer -pkg AWSCLIV2.pkg -target /`
+
