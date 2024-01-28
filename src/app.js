@@ -22,6 +22,7 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./swagger-jsdoc'); // swagger jsdoc
 // }
 const database = require('./database/database-config'); // database connection
+const rootRoutes = require('./routes/root-routes');
 const usersRoutes = require('./routes/users-routes'); // users routes
 const itemsRoutes = require('./routes/items-routes');
 const volunteersRoutes = require('./routes/volunteers-routes');
@@ -46,6 +47,7 @@ app.use(cors());
 // }
 
 // use authentication routes for /api/* routes
+app.use('/', rootRoutes);
 app.use('/users', usersRoutes);
 app.use('/volunteers', volunteersRoutes);
 app.use('/items', itemsRoutes);
