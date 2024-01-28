@@ -47,10 +47,10 @@ app.use(cors());
 // }
 
 // use authentication routes for /api/* routes
-app.use('/', rootRoutes);
-app.use('/users', usersRoutes);
-app.use('/volunteers', volunteersRoutes);
-app.use('/items', itemsRoutes);
+app.use('/api', rootRoutes);
+app.use('/api/users', usersRoutes);
+app.use('/api/volunteers', volunteersRoutes);
+app.use('/api/items', itemsRoutes);
 
 // export the app
 module.exports = app;
