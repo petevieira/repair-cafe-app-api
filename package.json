@@ -4,9 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start-server": "nodemon -r esm ./src/server.js",
-    "start:dev": "NODE_ENV=development npm run start-server",
-    "start:prod": "NODE_ENV=production pm2-runtime start server.js",
+    "start:dev": "NODE_ENV=development nodemon -r esm ./src/server.js",
+    "start:prod": "NODE_ENV=production ./node_modules/pm2/bin/pm2-runtime start src/server.js",
     "test": "NODE_ENV=test && jest --detectOpenHandles --testTimeout=10000 --coverage",
     "jsdoc": "jsdoc -c jsdoc-config.json"
   },
@@ -26,6 +25,7 @@
     "mongoose": "^6.0.12",
     "nanoid": "^2.1.11",
     "nodemon": "^2.0.20",
+    "pm2": "^5.3.1",
     "process": "^0.11.10"
   },
   "devDependencies": {
@@ -40,5 +40,8 @@
     "supertest": "^6.3.3",
     "swagger-jsdoc": "^6.2.7",
     "swagger-ui-express": "^4.6.0"
+  },
+  "engines": {
+    "node": "16.20.0"
   }
 }
