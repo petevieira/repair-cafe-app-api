@@ -9,44 +9,6 @@ const { StatusCodes } = require('http-status-codes'); // for HTTP status codes
 const Item = require('../models/item'); // import Item model
 const { sendResponse, validateRequest, toLowerCapFirstLetter } = require('../helpers/rest-helpers');
 
-async function addBasicItem(req, res) {
-	const result = validateRequest(req.body, [
-    'ownersEmail', 'ownersFirstName', 'ownersLastName',
-    'type', 'symptoms', 'brand', 'model', 'weight', 'cost'
-  ]);
-
-  if (result !== true) {
-    return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
-  }
-
-  try {
-    let {
-      ownersEmail, ownersFirstName, ownersLastName,
-      type, symptoms, brand, model, acceptsWaiver, weight, cost
-    } = req.body;
-
-    ownersEmail = ownersEmail.toLowerCase();
-    ownersFirstName = toLowerCapFirstLetter(ownersFirstName);
-    ownersLastName = toLowerCapFirstLetter(ownersLastName);
-
-    const item = await new Item({
-      ownersEmail,
-      ownersFirstName,
-      ownersLastName,
-      type,
-      symptoms,
-      brand,
-      model,
-      acceptsWaiver,
-      weight,
-      cost,
-    }).save();
-    return sendResponse(res, "Basic item created", { item: item });
-  } catch (error) {
-    console.error(error);
-  }
-}
-
 async function addFullItem(req, res) {
   const result = validateRequest(req.body, [
     'ownersEmail', 'ownersFirstName', 'ownersLastName', 'type',
@@ -236,4 +198,4 @@ async function deleteItem(req, res) {
   }
 }
 
-module.exports = { addBasicItem, addFullItem, getItemsBasic, deleteItem, updateItem, getItem };
+module.exports = { addFullItem, getItemsBasic, deleteItem, updateItem, getItem };

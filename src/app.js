@@ -26,6 +26,7 @@ const rootRoutes = require('./routes/root-routes');
 const usersRoutes = require('./routes/users-routes'); // users routes
 const itemsRoutes = require('./routes/items-routes');
 const volunteersRoutes = require('./routes/volunteers-routes');
+const textsRoutes = require('./routes/texts-routes');
 
 // create our ExpressJS app
 const app = express();
@@ -51,6 +52,7 @@ app.use('/api', rootRoutes);
 app.use('/api/users', usersRoutes);
 app.use('/api/volunteers', volunteersRoutes);
 app.use('/api/items', itemsRoutes);
+app.use('/api/text', textsRoutes);
 
 // export the app
 module.exports = app;
