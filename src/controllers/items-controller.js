@@ -12,7 +12,7 @@ const { sendResponse, validateRequest, toLowerCapFirstLetter } = require('../hel
 async function addBasicItem(req, res) {
 	const result = validateRequest(req.body, [
     'ownersEmail', 'ownersFirstName', 'ownersLastName',
-    'type', 'symptoms', 'brand', 'model'
+    'type', 'symptoms', 'brand', 'model', 'weight', 'cost'
   ]);
 
   if (result !== true) {
@@ -22,7 +22,7 @@ async function addBasicItem(req, res) {
   try {
     let {
       ownersEmail, ownersFirstName, ownersLastName,
-      type, symptoms, brand, model, acceptsWaiver
+      type, symptoms, brand, model, acceptsWaiver, weight, cost
     } = req.body;
 
     ownersEmail = ownersEmail.toLowerCase();
@@ -37,7 +37,9 @@ async function addBasicItem(req, res) {
       symptoms,
       brand,
       model,
-      acceptsWaiver
+      acceptsWaiver,
+      weight,
+      cost,
     }).save();
     return sendResponse(res, "Basic item created", { item: item });
   } catch (error) {
@@ -48,8 +50,8 @@ async function addBasicItem(req, res) {
 async function addFullItem(req, res) {
   const result = validateRequest(req.body, [
     'ownersEmail', 'ownersFirstName', 'ownersLastName', 'type',
-    'symptoms', 'brand', 'model', 'repairerFirstName',
-    'repairerLastName', 'notes', 'status', 'acceptsWaiver'
+    'symptoms', 'brand', 'model', 'repairerFirstName', 'weight',
+    'repairerLastName', 'notes', 'status', 'acceptsWaiver', 'cost'
   ]);
 
   if (result !== true) {
@@ -60,7 +62,7 @@ async function addFullItem(req, res) {
     let {
       acceptsWaiver, ownersEmail, ownersFirstName, ownersLastName,
       type, symptoms, brand, model, repairerFirstName, repairerLastName,
-      notes, status
+      notes, status, weight, cost
     } = req.body;
     ownersEmail = ownersEmail.toLowerCase();
     ownersFirstName = toLowerCapFirstLetter(ownersFirstName);
@@ -80,7 +82,9 @@ async function addFullItem(req, res) {
       repairerFirstName,
       repairerLastName,
       notes,
-      status
+      status,
+      weight,
+      cost
     }).save();
 
     return sendResponse(res, "Full item created", { item: item });
@@ -92,8 +96,8 @@ async function addFullItem(req, res) {
 async function updateItem(req, res) {
   const result = validateRequest(req.body, [
     'ownersEmail', 'ownersFirstName', 'ownersLastName', 'type',
-    'symptoms', 'brand', 'model', 'repairerFirstName',
-    'repairerLastName', 'notes', 'status', '_id', 'acceptsWaiver'
+    'symptoms', 'brand', 'model', 'repairerFirstName', 'weight',
+    'repairerLastName', 'notes', 'status', '_id', 'acceptsWaiver', 'cost'
   ]);
 
   if (result !== true) {
@@ -103,7 +107,8 @@ async function updateItem(req, res) {
   try {
     let {
       _id, acceptsWaiver, ownersEmail, ownersFirstName, ownersLastName, notes,
-      type, symptoms, brand, model, repairerFirstName, repairerLastName, status
+      type, symptoms, brand, model, repairerFirstName, repairerLastName, status,
+      weight, cost
     } = req.body;
     ownersEmail = ownersEmail.toLowerCase();
     ownersFirstName = toLowerCapFirstLetter(ownersFirstName);
@@ -125,7 +130,9 @@ async function updateItem(req, res) {
         repairerFirstName,
         repairerLastName,
         notes,
-        status
+        status,
+        weight,
+        cost
       }
     );
     const updatedItem = await Item.findById(_id);
