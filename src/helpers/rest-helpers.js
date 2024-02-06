@@ -22,7 +22,7 @@ function sendResponse(response, msg='', data={}, statusCode=StatusCodes.OK) {
 
   const status = (statusCode >= 200 && statusCode < 300);
   return response
-    .status(StatusCodes.OK)
+    .status(statusCode)
     .json({ status: status, msg: msg, data: data });
 }
 
