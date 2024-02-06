@@ -8,34 +8,29 @@
 // for access to ExpressJS router
 const express = require('express'); // for access to ExpressJS router
 const itemsController = require("../controllers/items-controller");
-const { authenticateToken, isAdmin, requireSignin } = require('../middleware');
+const { authenticateToken, requireIsAdmin, requireSignin } = require('../middleware');
 
 // create ExpressJS router
 const router = express.Router();
 
-// define /items/* routes
-router.post("/add-basic-item",
-  itemsController.addBasicItem
-);
-
 router.post("/add-full-item",
   authenticateToken,
   requireSignin,
-  isAdmin,
+  requireIsAdmin,
   itemsController.addFullItem
 );
 
 router.delete("/delete-item/:id",
   authenticateToken,
   requireSignin,
-  isAdmin,
+  requireIsAdmin,
   itemsController.deleteItem
 );
 
 router.put("/update-item",
   authenticateToken,
   requireSignin,
-  isAdmin,
+  requireIsAdmin,
   itemsController.updateItem
 );
 
@@ -46,15 +41,22 @@ router.get("/get-items-basic/:date",
 router.get("/get-item/:id",
   authenticateToken,
   requireSignin,
-  isAdmin,
+  requireIsAdmin,
   itemsController.getItem
 );
 
 router.delete("/delete-item/:id",
   authenticateToken,
   requireSignin,
-  isAdmin,
+  requireIsAdmin,
   itemsController.deleteItem
+);
+
+router.get("/find-owner-by-email/:email",
+  authenticateToken,
+  requireSignin,
+  requireIsAdmin,
+  itemsController.findOwnerByEmail
 );
 
 module.exports = router;
