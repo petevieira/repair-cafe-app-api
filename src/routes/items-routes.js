@@ -52,4 +52,11 @@ router.delete("/delete-item/:id",
   itemsController.deleteItem
 );
 
+router.get("/find-owner-by-email/:email",
+  authenticateToken,
+  requireSignin,
+  requireIsAdmin,
+  itemsController.findOwnerByEmail
+);
+
 module.exports = router;

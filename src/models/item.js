@@ -48,7 +48,7 @@ const itemSchema = new Schema(
       $type: String,
       trim: true,
     },
-    notes: {
+    repairNotes: {
       $type: String,
       trim: true,
     },
@@ -60,7 +60,11 @@ const itemSchema = new Schema(
       $type: String,
       trim: true,
     },
-    status: {
+    repairStatus: {
+      $type: String,
+      trim: true,
+    },
+    repairBarrier: {
       $type: String,
       trim: true,
     },

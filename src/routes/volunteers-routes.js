@@ -25,6 +25,13 @@ router.get("/get-past-volunteers",
   volunteersController.getPastVolunteers
 );
 
+router.get("/find-volunteer-by-email/:email",
+  authenticateToken,
+  requireSignin,
+  requireIsAdmin,
+  volunteersController.findVolunteerByEmail
+);
+
 router.post("/add-volunteer",
   authenticateToken,
   requireSignin,

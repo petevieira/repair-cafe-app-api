@@ -188,4 +188,25 @@ async function getPastVolunteers(req, res) {
   }
 }
 
-module.exports = { addVolunteer, updateVolunteer, deleteVolunteer, getDaysVolunteers, getVolunteer, getPastVolunteers };
+async function findVolunteerByEmail(req, res) {
+  const result = validateRequest(req.params, ['email']);
+  if (result !== true) {
+    return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
+  }
+
+  try {
+    const volunteer = await Volunteer.findOne({email: req.params.email});
+    return sendResponse(
+      res,
+      `Found volunteer with email ${req.params.email}`,
+      { volunteer: volunteer }
+    );
+  } catch (err) {
+    return sendResponse(res, err, {}, StatusCodes.INTERNAL_SERVER_ERROR);
+  }
+}
+
+module.exports = {
+  addVolunteer, updateVolunteer, deleteVolunteer, getDaysVolunteers,
+  getVolunteer, getPastVolunteers, findVolunteerByEmail
+};
