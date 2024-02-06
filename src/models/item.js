@@ -3,6 +3,8 @@
  * @requires mongoose
  */
 
+require('dotenv').config();
+const process = require('process');
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
@@ -46,7 +48,7 @@ const itemSchema = new Schema(
       $type: String,
       trim: true,
     },
-    notes: {
+    repairNotes: {
       $type: String,
       trim: true,
     },
@@ -58,9 +60,31 @@ const itemSchema = new Schema(
       $type: String,
       trim: true,
     },
-    status: {
+    repairStatus: {
       $type: String,
       trim: true,
+    },
+    repairBarrier: {
+      $type: String,
+      trim: true,
+    },
+    weight: {
+      $type: Number,
+      min: 0,
+    },
+    cost: {
+      $type: Number,
+      min: 0,
+    },
+    weightUnits: {
+      $type: String,
+      trim: true,
+      default: process.env.WEIGHT_UNITS || 'kg'
+    },
+    costUnits: {
+      $type: String,
+      trim: true,
+      default: process.env.COST_UNITS || 'euros'
     },
     imagesUrls: [{
       $type: String

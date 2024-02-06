@@ -136,11 +136,77 @@ async function getDaysVolunteers(req, res) {
         }
       }
     ]);
-    return sendResponse(res, `Found ${volunteers.length} volunteer(s)`, { volunteers: volunteers });
+    return sendResponse(
+      res,
+      `Found ${volunteers.length} volunteer(s)`,
+      { volunteers: volunteers }
+    );
   } catch (err) {
     console.error(err);
     return sendResponse(res, err, {}, StatusCodes.INTERNAL_SERVER_ERROR);
   }
 }
 
-module.exports = { addVolunteer, updateVolunteer, deleteVolunteer, getDaysVolunteers, getVolunteer };
+async function getPastVolunteers(req, res) {
+  try {
+    const volunteers = await Volunteer.aggregate(
+      [
+        // Exclude documents with missing email
+        {
+          $match: {
+            email: {
+              $exists: true,
+              $ne: null
+            }
+          }
+        },
+        // Find distinct volunteers based on first and last name
+        {
+          $group: {
+            _id: "$email",
+            "doc": { "$first": "$$ROOT"}
+          }
+        },
+        {
+          $replaceRoot: {
+            "newRoot": "$doc"
+          }
+        },
+        // Sort by updatedAt date in descending order
+        {
+          $sort: { updatedAt: -1 }
+        },
+      ]
+    );
+    return sendResponse(
+      res,
+      `Found ${volunteers.length} unique volunteer(s)`,
+      { pastVolunteers: volunteers }
+    );
+  } catch (err) {
+    return sendResponse(res, err, {}, StatusCodes.INTERNAL_SERVER_ERROR);
+  }
+}
+
+async function findVolunteerByEmail(req, res) {
+  const result = validateRequest(req.params, ['email']);
+  if (result !== true) {
+    return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
+  }
+
+  try {
+    const volunteer = await Volunteer.findOne({email: req.params.email});
+    return sendResponse(
+      res,
+      `Found volunteer with email ${req.params.email}`,
+      { volunteer: volunteer }
+    );
+  } catch (err) {
+    return sendResponse(res, err, {}, StatusCodes.INTERNAL_SERVER_ERROR);
+  }
+}
+
+module.exports = {
+  addVolunteer, updateVolunteer, deleteVolunteer, getDaysVolunteers,
+  getVolunteer, getPastVolunteers, findVolunteerByEmail
+};

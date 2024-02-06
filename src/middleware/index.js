@@ -12,7 +12,7 @@ const requireSignin = expressjwt({
   audience: process.env.JWT_AUDIENCE
 });
 
-const isAdmin = async (req, res, next) => {
+const requireIsAdmin = async (req, res, next) => {
   try {
     // you get req.user._id from verified jwt token
     const user = await User.findById(req.auth._id);
@@ -71,4 +71,4 @@ const verifyClientToken = (token) => {
   );
 }
 
-module.exports = { requireSignin, isAdmin, authenticateToken, verifyClientToken };
+module.exports = { requireSignin, requireIsAdmin, authenticateToken, verifyClientToken };
