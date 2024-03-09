@@ -11,7 +11,7 @@ const { sendResponse, validateRequest, toLowerCapFirstLetter } = require('../hel
 
 async function addFullItem(req, res) {
   const result = validateRequest(req.body, [
-    'ownersEmail', 'ownersFirstName', 'ownersLastName', 'type',
+    'ownersEmail', 'ownersFirstName', 'ownersLastName', 'type', 'product',
     'symptoms', 'brand', 'model', 'repairerFirstName', 'weight',
     'repairerLastName', 'repairNotes', 'repairStatus', 'repairBarrier',
     'acceptsWaiver', 'cost'
@@ -23,7 +23,7 @@ async function addFullItem(req, res) {
 
   try {
     let {
-      acceptsWaiver, ownersEmail, ownersFirstName, ownersLastName,
+      acceptsWaiver, ownersEmail, ownersFirstName, ownersLastName, product,
       type, symptoms, brand, model, repairerFirstName, repairerLastName,
       repairNotes, repairStatus, repairBarrier, weight, cost
     } = req.body;
@@ -38,6 +38,7 @@ async function addFullItem(req, res) {
       ownersEmail,
       ownersFirstName,
       ownersLastName,
+      product,
       type,
       symptoms,
       brand,
@@ -59,7 +60,7 @@ async function addFullItem(req, res) {
 
 async function updateItem(req, res) {
   const result = validateRequest(req.body, [
-    'ownersEmail', 'ownersFirstName', 'ownersLastName', 'type',
+    'ownersEmail', 'ownersFirstName', 'ownersLastName', 'type', 'product',
     'symptoms', 'brand', 'model', 'repairerFirstName', 'weight',
     'repairerLastName', 'repairNotes', 'repairStatus', 'repairBarrier',
     '_id', 'acceptsWaiver', 'cost'
@@ -71,7 +72,7 @@ async function updateItem(req, res) {
 
   try {
     let {
-      _id, acceptsWaiver, ownersEmail, ownersFirstName, ownersLastName, repairNotes,
+      _id, acceptsWaiver, ownersEmail, ownersFirstName, ownersLastName, repairNotes, product,
       type, symptoms, brand, model, repairerFirstName, repairerLastName, repairStatus,
       weight, cost, repairBarrier
     } = req.body;
@@ -88,6 +89,7 @@ async function updateItem(req, res) {
         ownersEmail,
         ownersFirstName,
         ownersLastName,
+        product,
         type,
         symptoms,
         brand,
@@ -162,7 +164,7 @@ async function getItemsBasic(req, res) {
               ''
             ]
           },
-          type: 1,
+          product: 1,
           repairerFirstName: 1,
           repairerLastName: {
             $ifNull: [

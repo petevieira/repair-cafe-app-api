@@ -31,6 +31,11 @@ const itemSchema = new Schema(
       trim: true,
       required: true,
     },
+    product: {
+      $type: String,
+      trim: true,
+      required: true,
+    },
     type: {
       $type: String,
       trim: true,

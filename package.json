@@ -9,6 +9,9 @@
     "test": "NODE_ENV=test && jest --detectOpenHandles --testTimeout=10000 --coverage",
     "jsdoc": "jsdoc -c jsdoc-config.json"
   },
+  "engines": {
+    "node": "20.11.1"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -40,8 +43,5 @@
     "supertest": "^6.3.3",
     "swagger-jsdoc": "^6.2.7",
     "swagger-ui-express": "^4.6.0"
-  },
-  "engines": {
-    "node": "16.20.0"
   }
 }
