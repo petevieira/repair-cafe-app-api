@@ -58,4 +58,8 @@ const comparePassword = (password, hashed) => {
   return bcrypt.compare(password, hashed);
 }
 
-module.exports = { createSignedToken, hashPassword, comparePassword };
+module.exports = {
+    createSignedToken,
+    hashPassword,
+    comparePassword,
+};

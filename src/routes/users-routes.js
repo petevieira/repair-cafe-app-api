@@ -13,5 +13,5 @@ const router = express.Router(); // create ExpressJS router
 router.get("/user-is-admin/:email", usersController.userIsAdmin);
 router.post("/sign-in-admin", usersController.signInAdmin);
 
-// export router to app can use it
+// Export router to app can use it
 module.exports = router;

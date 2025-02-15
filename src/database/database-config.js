@@ -4,25 +4,25 @@
  * @requires mongoose
  * This is the database setup for connecting to the real MongoDB server.
  * Just use the connect() function to start a connection and start interacting
- *   with your database.
+ * with your database.
  */
 
-// to read config.env file
+// To read config.env file
 require('dotenv').config();
 
-// to connect to database
+// To connect to database
 const mongoose = require('mongoose');
 
-// connection options
+// Connection options
 const connectionOptions = {
   useNewUrlParser: true,
   useUnifiedTopology: true
 };
 
-// use strict queries for Mongoose
+// Use strict queries for Mongoose
 mongoose.set('strictQuery', true);
 
-// connection string retreived from Mongodb Atlas
+// Connection string retreived from Mongodb Atlas
 let connectionString = '';
 if (process.env.NODE_ENV === 'production') {
   connectionString = process.env.DATABASE_CONNECTION_STRING;
@@ -30,8 +30,8 @@ if (process.env.NODE_ENV === 'production') {
   connectionString = process.env.DEV_DATABASE_CONNECTION_STRING;
 }
 
-/**.
- * connects to database
+/**
+ * Connects to database
  */
 async function connect() {
   console.log(

@@ -14,7 +14,7 @@ async function addFullItem(req, res) {
     'ownersEmail', 'ownersFirstName', 'ownersLastName', 'type', 'product',
     'symptoms', 'brand', 'model', 'repairerFirstName', 'weight',
     'repairerLastName', 'repairNotes', 'repairStatus', 'repairBarrier',
-    'acceptsWaiver', 'cost'
+    'acceptsWaiver', 'cost', 'isFollowUpRepair',
   ]);
 
   if (result !== true) {
@@ -25,7 +25,7 @@ async function addFullItem(req, res) {
     let {
       acceptsWaiver, ownersEmail, ownersFirstName, ownersLastName, product,
       type, symptoms, brand, model, repairerFirstName, repairerLastName,
-      repairNotes, repairStatus, repairBarrier, weight, cost
+      repairNotes, repairStatus, repairBarrier, weight, cost, isFollowUpRepair,
     } = req.body;
     ownersEmail = ownersEmail.toLowerCase();
     ownersFirstName = toLowerCapFirstLetter(ownersFirstName);
@@ -49,7 +49,8 @@ async function addFullItem(req, res) {
       repairStatus,
       repairBarrier,
       weight,
-      cost
+      cost,
+      isFollowUpRepair,
     }).save();
 
     return sendResponse(res, "Full item created", { item: item });
@@ -63,7 +64,7 @@ async function updateItem(req, res) {
     'ownersEmail', 'ownersFirstName', 'ownersLastName', 'type', 'product',
     'symptoms', 'brand', 'model', 'repairerFirstName', 'weight',
     'repairerLastName', 'repairNotes', 'repairStatus', 'repairBarrier',
-    '_id', 'acceptsWaiver', 'cost'
+    '_id', 'acceptsWaiver', 'cost', 'isFollowUpRepair',
   ]);
 
   if (result !== true) {
@@ -74,7 +75,7 @@ async function updateItem(req, res) {
     let {
       _id, acceptsWaiver, ownersEmail, ownersFirstName, ownersLastName, repairNotes, product,
       type, symptoms, brand, model, repairerFirstName, repairerLastName, repairStatus,
-      weight, cost, repairBarrier
+      weight, cost, repairBarrier, isFollowUpRepair,
     } = req.body;
     ownersEmail = ownersEmail.toLowerCase();
     ownersFirstName = toLowerCapFirstLetter(ownersFirstName);
@@ -100,7 +101,8 @@ async function updateItem(req, res) {
         repairStatus,
         repairBarrier,
         weight,
-        cost
+        cost,
+        isFollowUpRepair,
       }
     );
     const updatedItem = await Item.findById(_id);

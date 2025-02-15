@@ -14,7 +14,7 @@ const { authenticateToken, requireIsAdmin, requireSignin } = require('../middlew
 const router = express.Router();
 
 router.get("/get-text/:field",
-  textsController.getText
+    textsController.getText
 );
 
 module.exports = router;

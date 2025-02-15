@@ -2,12 +2,11 @@
 const express = require('express'); // for access to ExpressJS router
 const volunteersController = require('../controllers/volunteers-controller');
 const { authenticateToken, requireIsAdmin, requireSignin } = require('../middleware');
-const { expressjwt } = require('express-jwt');
 
-// create ExpressJS router
+// Create ExpressJS router
 const router = express.Router();
 
-// define /volunteer/* routes
+// Define /volunteer/* routes
 /**
  * Pass in date at 12am in local time converted to UTC time.
  * e.g.:

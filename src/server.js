@@ -4,14 +4,12 @@
  * @description loads the app and starts listening to requests.
  */
 
-// const fs = require('fs'); // for file system interaction
-// const https = require('https'); // for secure HTTPS
 const process = require('process'); // for uncaught exceptions
 
 const app = require('./app'); // get our ExpressJS app
 const database = require('./database/database-config'); // database connection
 
-/* Catch uncaught exceptions and exit app */
+// Catch uncaught exceptions and exit app
 process.on("uncaughtException", err => {
   console.error("UNCAUGHT EXCEPTION!!! shutting down...");
   console.error(err.name, err.message);
@@ -26,13 +24,13 @@ const sslOptions = {
 //   cert: cert
 };
 
-// connect to database
-let db = database.connect();
+// Connect to database
+database.connect();
 
-// create server with secure https
+// Create server with secure https
 // https.createServer(sslOptions, app);
 
-// start listening for requests
+// Start listening for requests
 const port = process.env.PORT || 3000;
 const server = app.listen(port, () => {
   console.log('App is running in ' + process.env.NODE_ENV
@@ -47,6 +45,6 @@ function handleSignal(signal) {
   });
 }
 
-// handle Interrupt and Terminate signals on command-line
+// Handle Interrupt and Terminate signals on command-line
 process.on('SIGINT', handleSignal);
 process.on('SIGTERM', handleSignal);

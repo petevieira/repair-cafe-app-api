@@ -81,6 +81,10 @@ const itemSchema = new Schema(
       $type: Number,
       min: 0,
     },
+    isFollowUpRepair: {
+      $type: Boolean,
+      default: false,
+    },
     weightUnits: {
       $type: String,
       trim: true,
