@@ -29,7 +29,6 @@ const itemSchema = new Schema(
     ownersLastName: {
       $type: String,
       trim: true,
-      required: true,
     },
     product: {
       $type: String,

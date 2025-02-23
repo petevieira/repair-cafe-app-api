@@ -1,7 +1,9 @@
 
 const express = require('express'); // for access to ExpressJS router
 const volunteersController = require('../controllers/volunteers-controller');
-const { authenticateToken, requireIsAdmin, requireSignin } = require('../middleware');
+const {
+    authenticateToken, requireIsAdmin, requireSignin, requireIsVolunteer,
+} = require('../middleware');
 
 // Create ExpressJS router
 const router = express.Router();
@@ -20,21 +22,21 @@ router.get("/get-days-volunteers/:date",
 router.get("/get-past-volunteers",
   authenticateToken,
   requireSignin,
-  requireIsAdmin,
+  requireIsVolunteer,
   volunteersController.getPastVolunteers
 );
 
 router.get("/find-volunteer-by-email/:email",
   authenticateToken,
   requireSignin,
-  requireIsAdmin,
+  requireIsVolunteer,
   volunteersController.findVolunteerByEmail
 );
 
 router.post("/add-volunteer",
   authenticateToken,
   requireSignin,
-  requireIsAdmin,
+  requireIsVolunteer,
   volunteersController.addVolunteer
 );
 
@@ -48,14 +50,14 @@ router.delete("/delete-volunteer/:id",
 router.put("/update-volunteer",
   authenticateToken,
   requireSignin,
-  requireIsAdmin,
+  requireIsVolunteer,
   volunteersController.updateVolunteer
 );
 
 router.get("/get-volunteer/:id",
   authenticateToken,
   requireSignin,
-  requireIsAdmin,
+  requireIsVolunteer,
   volunteersController.getVolunteer
 );
 

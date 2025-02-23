@@ -7,7 +7,13 @@
 
 const { StatusCodes } = require('http-status-codes'); // for HTTP status codes
 const Item = require('../models/item'); // import Item model
-const { sendResponse, validateRequest, toLowerCapFirstLetter } = require('../helpers/rest-helpers');
+const {
+    sendResponse,
+    validateRequest,
+    toLowerCapFirstLetter,
+    extractErrorMessage
+} = require('../helpers/rest-helpers');
+const { emailIsSubscribed } = require('./subscribers-controller');
 
 async function addFullItem(req, res) {
   const result = validateRequest(req.body, [
@@ -136,6 +142,12 @@ async function getItem(req, res) {
   }
 }
 
+/**
+ *
+ * @param {*} req - date: YYYY-MM-DDTHH:mm:ss.sssZ
+ * @param {*} res
+ * @returns
+ */
 async function getItemsBasic(req, res) {
   const result = validateRequest(req.params, ['date']);
   if (result !== true) {
@@ -184,6 +196,37 @@ async function getItemsBasic(req, res) {
   }
 }
 
+async function findIncompleteItemsByOwner(req, res) {
+    const result = validateRequest(req.params, ['email']);
+    if (result !== true) {
+        return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
+    }
+    if (req.params.email.trim() === "") {
+        return sendResponse(res, "email empty", {}, StatusCodes.BAD_REQUEST);
+    }
+
+    const email = req.params.email;
+
+    try {
+        const items = await Item.find({
+            ownersEmail: email,
+            repairStatus: { $nin: ["Fixed", "End of Life"] }
+        });
+        if (items.length === 0) {
+            return sendResponse(
+                res,
+                `No incomplete item found with owner's email ${email}`,
+                {},
+                StatusCodes.BAD_REQUEST
+            );
+        }
+        return sendResponse(res, `Found ${items.length} incomplete item(s)`, { items: items });
+    } catch (error) {
+        console.error(error);
+        return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+}
+
 async function deleteItem(req, res) {
   // Check for required request params
   const result = validateRequest(req.params, ['id']);
@@ -218,20 +261,26 @@ async function findOwnerByEmail(req, res) {
   const email = req.params.email;
 
   try {
+    const subscribed = await emailIsSubscribed(email);
+
     const item = await Item.findOne({ ownersEmail: email });
     if (!item) {
-      return sendResponse(
-        res,
-        `No item found with owner's email ${email}`,
-      );
+      const owner = {
+        firstName: "",
+        lastName: "",
+        subscribedToNewsletter: subscribed,
+      };
+      return sendResponse(res, `No item found with owner's email ${email}`, { owner });
     }
+
     return sendResponse(
       res,
       `Item with owner email of ${email} found.`,
       {
         owner: {
           firstName: item.ownersFirstName,
-          lastName: item.ownersLastName
+          lastName: item.ownersLastName,
+          subscribedToNewsletter: subscribed,
         }
       }
     );
@@ -240,6 +289,58 @@ async function findOwnerByEmail(req, res) {
   }
 }
 
+async function findPreviousEventDate(req, res) {
+  const result = validateRequest(req.body, ['date']);
+  if (result !== true) {
+    return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
+  }
+
+  const date = req.body.date;
+
+  try {
+    const previousDate = await Item.findOne({
+      createdAt: { $lt: date }
+    }).sort({ createdAt: -1 });
+
+    if (!previousDate) {
+      return sendResponse(res, "No previous event date found");
+    }
+
+    return sendResponse(res, "Previous event date found", { previousDate });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+async function findNextEventDate(req, res) {
+  const result = validateRequest(req.body, ['date']);
+  if (result !== true) {
+    return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
+  }
+
+  const date = req.body.date;
+
+  try {
+    const nextDate = await Item.findOne({
+      createdAt: { $gt: date }
+    }).sort({ createdAt: 1 });
+
+    if (!nextDate) {
+      return sendResponse(res, "No next event date found");
+    }
+
+    return sendResponse(res, "Next event date found", { nextDate });
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 module.exports = {
-  addFullItem, getItemsBasic, deleteItem, updateItem, getItem, findOwnerByEmail
+    addFullItem,
+    getItemsBasic,
+    deleteItem,
+    updateItem,
+    getItem,
+    findOwnerByEmail,
+    findIncompleteItemsByOwner,
 };

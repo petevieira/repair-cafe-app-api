@@ -24,6 +24,8 @@ const usersRoutes = require('./routes/users-routes'); // users routes
 const itemsRoutes = require('./routes/items-routes');
 const volunteersRoutes = require('./routes/volunteers-routes');
 const textsRoutes = require('./routes/texts-routes');
+const subscribersRoutes = require('./routes/subscribers-routes');
+const eventsRoutes = require('./routes/events-routes');
 
 // Create our ExpressJS app
 const app = express();
@@ -50,6 +52,8 @@ app.use('/api/users', usersRoutes);
 app.use('/api/volunteers', volunteersRoutes);
 app.use('/api/items', itemsRoutes);
 app.use('/api/text', textsRoutes);
+app.use('/api/subscribers', subscribersRoutes);
+app.use('/api/events', eventsRoutes);
 
 // Export the app
 module.exports = app;
