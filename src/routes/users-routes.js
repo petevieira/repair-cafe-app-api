@@ -13,11 +13,11 @@ const router = express.Router(); // create ExpressJS router
 
 router.get("/email-is-registered/:email", usersController.emailIsRegistered);
 router.post("/sign-in", usersController.signIn);
-router.post("/user-is-admin",
+router.post("/signed-in-user-is-admin",
     authenticateToken,
     requireSignin,
     requireIsAdmin,
-    usersController.userIsAdmin
+    usersController.signedInUserIsAdmin
 );
 
 // Export router to app can use it

@@ -89,12 +89,36 @@ async function signIn(req, res) {
     }
 }
 
-const userIsAdmin = async (req, res) => {
-    return sendResponse(res, `User with email ${req.user.email} is an admin`);
+const signedInUserIsAdmin = async (req, res) => {
+    // Get user from auth
+    const authUser = req.auth._id;
+
+    if (!authUser) {
+        return sendResponse(res, 'No auth user found in request', {}, StatusCodes.BAD_REQUEST);
+    }
+
+    if (authUser.role !== "admin") {
+        return sendResponse(res, 'User is not an admin', { isAdmin: false });
+    }
+
+    const id = authUser._id;
+
+    // Get user by authUser _id
+    const user = await User
+        .findOne({ _id: id })
+        .select('role');
+
+    if (!user) {
+        return sendResponse(res, `No user found with id ${id}`, {}, StatusCodes.BAD_REQUEST);
+    }
+    if (user.role !== "admin") {
+        return sendResponse(res, `User with id ${id} not an admin`, { isAdmin: false });
+    }
+    return sendResponse(res, `User with id ${id} is an admin`, { isAdmin: true });
 }
 
 module.exports = {
     signIn,
     emailIsRegistered,
-    userIsAdmin,
+    signedInUserIsAdmin,
 };

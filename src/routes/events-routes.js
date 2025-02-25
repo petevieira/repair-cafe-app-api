@@ -20,12 +20,16 @@ router.post("/create-event/",
     eventsController.createEvent,
 );
 
-router.delete("/delete-event-by-id/",
+router.delete("/delete-event-by-id/:id",
     authenticateToken,
     requireSignin,
     requireIsAdmin,
     eventsController.deleteEventById,
 );
+
+router.post("/get-event-by-date/",
+    eventsController.getEventByDate,
+)
 
 router.post("/update-event/",
     authenticateToken,
@@ -49,7 +53,21 @@ router.post("/get-event-by-id/",
 )
 
 router.post("/get-most-recent-event/",
+    authenticateToken,
+    requireSignin,
     eventsController.getMostRecentEvent,
 );
+
+router.post("/get-previous-event/",
+    authenticateToken,
+    requireSignin,
+    eventsController.getPreviousEvent,
+)
+
+router.post("/get-next-event/",
+    authenticateToken,
+    requireSignin,
+    eventsController.getNextEvent,
+)
 
 module.exports = router;

@@ -61,6 +61,7 @@ const authenticateToken = async (req, res, next) => {
 
   try {
     const decodedPayload = await verifyClientToken(token);
+
     // store decoded userId in request object for next function to use
     req.userId = decodedPayload._id;
     next(); // redirect back to requested endpoint
