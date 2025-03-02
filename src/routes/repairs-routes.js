@@ -1,13 +1,13 @@
 /**
- * @namespace items
- * @module items-routes
- * @description Router for items endpoints
+ * @namespace repairs
+ * @module repairs-routes
+ * @description Router for repairs endpoints
  * @requires express
  */
 
 // for access to ExpressJS router
 const express = require('express'); // for access to ExpressJS router
-const itemsController = require("../controllers/items-controller");
+const repairsController = require("../controllers/repairs-controller");
 const {
     authenticateToken, requireIsAdmin, requireSignin, requireIsVolunteer,
 } = require('../middleware');
@@ -15,50 +15,50 @@ const {
 // create ExpressJS router
 const router = express.Router();
 
-router.post("/add-full-item",
+router.post("/add-full-repair",
   authenticateToken,
   requireSignin,
   requireIsVolunteer,
-  itemsController.addFullItem
+  repairsController.addFullRepair
 );
 
-router.delete("/delete-item/:id",
+router.delete("/delete-repair/:id",
   authenticateToken,
   requireSignin,
   requireIsAdmin,
-  itemsController.deleteItem
+  repairsController.deleteRepair
 );
 
-router.put("/update-item",
+router.put("/update-repair",
   authenticateToken,
   requireSignin,
   requireIsVolunteer,
-  itemsController.updateItem
+  repairsController.updateRepair
 );
 
-router.get("/get-items-basic/:date",
-  itemsController.getItemsBasic
+router.get("/get-repairs-basic/:date",
+    repairsController.getRepairsBasic
 );
 
-router.get("/get-item/:id",
+router.get("/get-repair/:id",
   authenticateToken,
   requireSignin,
   requireIsVolunteer,
-  itemsController.getItem
+  repairsController.getRepair
 );
 
 router.get("/find-owner-by-email/:email",
   authenticateToken,
   requireSignin,
   requireIsVolunteer,
-  itemsController.findOwnerByEmail
+  repairsController.findOwnerByEmail
 );
 
-router.get("/find-incomplete-items-by-owner/:email",
+router.get("/find-incomplete-repairs-by-owner/:email",
     authenticateToken,
     requireSignin,
     requireIsVolunteer,
-    itemsController.findIncompleteItemsByOwner
+    repairsController.findIncompleteRepairsByOwner
 );
 
 module.exports = router;

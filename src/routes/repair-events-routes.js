@@ -7,7 +7,7 @@
 
 // for access to ExpressJS router
 const express = require('express'); // for access to ExpressJS router
-const eventsController = require("../controllers/events-controller");
+const repairEventsController = require("../controllers/repair-events-controller");
 const { authenticateToken, requireIsAdmin, requireSignin } = require('../middleware');
 
 // create ExpressJS router
@@ -17,57 +17,55 @@ router.post("/create-event/",
     authenticateToken,
     requireSignin,
     requireIsAdmin,
-    eventsController.createEvent,
+    repairEventsController.createEvent,
 );
 
 router.delete("/delete-event-by-id/:id",
     authenticateToken,
     requireSignin,
     requireIsAdmin,
-    eventsController.deleteEventById,
+    repairEventsController.deleteEventById,
 );
 
 router.post("/get-event-by-date/",
-    eventsController.getEventByDate,
+    repairEventsController.getEventByDate,
 )
 
 router.post("/update-event/",
     authenticateToken,
     requireSignin,
     requireIsAdmin,
-    eventsController.updateEvent,
+    repairEventsController.updateEvent,
 );
 
 router.get("/get-events/",
     authenticateToken,
     requireSignin,
     requireIsAdmin,
-    eventsController.getEvents,
+    repairEventsController.getEvents,
 );
 
 router.post("/get-event-by-id/",
     authenticateToken,
     requireSignin,
     requireIsAdmin,
-    eventsController.getEventById,
+    repairEventsController.getEventById,
 )
 
 router.post("/get-most-recent-event/",
-    authenticateToken,
-    requireSignin,
-    eventsController.getMostRecentEvent,
+    repairEventsController.getMostRecentEvent,
 );
 
 router.post("/get-previous-event/",
     authenticateToken,
     requireSignin,
-    eventsController.getPreviousEvent,
+    repairEventsController.getPreviousEvent,
 )
 
 router.post("/get-next-event/",
     authenticateToken,
     requireSignin,
-    eventsController.getNextEvent,
+    repairEventsController.getNextEvent,
 )
 
 module.exports = router;

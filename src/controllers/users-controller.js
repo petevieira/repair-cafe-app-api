@@ -106,15 +106,15 @@ const signedInUserIsAdmin = async (req, res) => {
     // Get user by authUser _id
     const user = await User
         .findOne({ _id: id })
-        .select('role');
+        .select(['role', 'email']);
 
     if (!user) {
         return sendResponse(res, `No user found with id ${id}`, {}, StatusCodes.BAD_REQUEST);
     }
     if (user.role !== "admin") {
-        return sendResponse(res, `User with id ${id} not an admin`, { isAdmin: false });
+        return sendResponse(res, `User with email ${user.email} not an admin`, { isAdmin: false });
     }
-    return sendResponse(res, `User with id ${id} is an admin`, { isAdmin: true });
+    return sendResponse(res, `User with email ${user.email} is an admin`, { isAdmin: true });
 }
 
 module.exports = {

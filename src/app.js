@@ -20,12 +20,12 @@ if (process.env.NODE_ENV !== 'production') {
     swaggerSpec = require('./swagger-jsdoc'); // swagger jsdoc
 }
 const rootRoutes = require('./routes/root-routes');
-const usersRoutes = require('./routes/users-routes'); // users routes
-const itemsRoutes = require('./routes/items-routes');
-const volunteersRoutes = require('./routes/volunteers-routes');
-const textsRoutes = require('./routes/texts-routes');
+const repairsRoutes = require('./routes/repairs-routes');
+const repairEventsRoutes = require('./routes/repair-events-routes');
 const subscribersRoutes = require('./routes/subscribers-routes');
-const eventsRoutes = require('./routes/events-routes');
+const textsRoutes = require('./routes/texts-routes');
+const volunteersRoutes = require('./routes/volunteers-routes');
+const usersRoutes = require('./routes/users-routes'); // users routes
 
 // Create our ExpressJS app
 const app = express();
@@ -48,12 +48,12 @@ if (process.env.NODE_ENV !== 'production') {
 
 // Use authentication routes for /api/* routes
 app.use('/api', rootRoutes);
-app.use('/api/users', usersRoutes);
-app.use('/api/volunteers', volunteersRoutes);
-app.use('/api/items', itemsRoutes);
-app.use('/api/text', textsRoutes);
+app.use('/api/repairs', repairsRoutes);
+app.use('/api/repair-events', repairEventsRoutes);
 app.use('/api/subscribers', subscribersRoutes);
-app.use('/api/events', eventsRoutes);
+app.use('/api/text', textsRoutes);
+app.use('/api/volunteers', volunteersRoutes);
+app.use('/api/users', usersRoutes);
 
 // Export the app
 module.exports = app;

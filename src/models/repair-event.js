@@ -1,5 +1,5 @@
 /**
- * @description event model
+ * @description repairEvent model
  * @requires mongoose
  */
 
@@ -7,7 +7,7 @@ mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 // create schema
-const eventSchema = new Schema(
+const repairEventSchema = new Schema(
   {
     date: {
       type: Date,
@@ -17,4 +17,4 @@ const eventSchema = new Schema(
 );
 
 // export the model for use in the app
-module.exports = mongoose.model("Event", eventSchema);
+module.exports = mongoose.model("RepairEvent", repairEventSchema);

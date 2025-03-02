@@ -6,7 +6,7 @@
  */
 
 const { StatusCodes } = require('http-status-codes'); // for HTTP status codes
-const Event = require('../models/event'); // import model
+const RepairEvent = require('../models/repair-event'); // import model
 const { sendResponse, validateRequest } = require('../helpers/rest-helpers');
 
 /**
@@ -30,17 +30,21 @@ const createEvent = async (req, res) => {
     }
 
     try {
-        const foundEvent = await Event.findOne({ date: date });
+        const foundEvent = await RepairEvent.findOne({ date: date });
 
         if (!foundEvent) {
-            newEvent = await new Event({ date }).save();
+            newEvent = await new RepairEvent({ date }).save();
             if (!newEvent) {
-                return sendResponse(res, 'Error adding event', {}, StatusCodes.INTERNAL_SERVER_ERROR);
+                return sendResponse(
+                    res, 'Error adding event', {}, StatusCodes.INTERNAL_SERVER_ERROR
+                );
             }
-            return sendResponse(res, `Event added with date ${date.toUTCString()}`, { event: newEvent }, StatusCodes.CREATED);
+            const msg = `Event added with date ${date.toUTCString()}`;
+            return sendResponse(res, msg, { createdEvent: newEvent }, StatusCodes.CREATED);
         }
 
-        return sendResponse(res, `Event with date ${date.toUTCString()} already exists`, { event: foundEvent });
+        const msg = `Event with date ${date.toUTCString()} already exists`;
+        return sendResponse(res, msg, { createdEvent: foundEvent });
     } catch (error) {
         console.error(error);
         return sendResponse(
@@ -59,7 +63,7 @@ const deleteEventById = async (req, res) => {
     const id = req.params.id;
 
     try {
-        const event = await Event.findOneAndDelete({ _id: id });
+        const event = await RepairEvent.findOneAndDelete({ _id: id });
 
         if (!event) {
             return sendResponse(res, `Event with _id ${id} not found`);
@@ -86,7 +90,7 @@ const updateEvent = async (req, res) => {
     }
 
     try {
-        const updatedEvent = await Event.findOneAndUpdate(
+        const updatedEvent = await RepairEvent.findOneAndUpdate(
             { _id: requestEvent._id },
             { date: requestEvent.date },
             { new: true }
@@ -109,7 +113,7 @@ const updateEvent = async (req, res) => {
 
 const getEvents = async (req, res) => {
     try {
-        const events = await Event.find();
+        const events = await RepairEvent.find();
 
         return sendResponse(res, 'Events retrieved', { events });
     } catch (error) {
@@ -128,7 +132,7 @@ const getEventById = async (req, res) => {
     const id = req.body.id;
 
     try {
-        const event = await Event.findOne({ _id: id });
+        const event = await RepairEvent.findOne({ _id: id });
 
         if (!event) {
             return sendResponse(res, `Event with id ${id} not found`);
@@ -161,13 +165,13 @@ const getMostRecentEvent = async (req, res) => {
     }
 
     try {
-        const event = await
-            Event.findOne({ date: { $lte: todaysDate } })
+        const mostRecentEvent = await
+            RepairEvent.findOne({ date: { $lte: todaysDate } })
                 .sort({ date: -1 });
-        if (!event) {
+        if (!mostRecentEvent) {
             return sendResponse(res, 'No events found');
         }
-        return sendResponse(res, 'Most recent event retrieved', { event });
+        return sendResponse(res, 'Most recent event retrieved', { mostRecentEvent });
     } catch (error) {
         console.error(error);
         return sendResponse(res, 'Error retrieving most recent event', {}, StatusCodes.INTERNAL_SERVER_ERROR);
@@ -192,7 +196,7 @@ const getEventByDate = async (req, res) => {
     inputDate.set
 
     try {
-        const event = await Event.findOne({ date: date });
+        const event = await RepairEvent.findOne({ date: date });
 
         if (!event) {
             return sendResponse(res, `Event with date ${date} not found`);
@@ -223,7 +227,7 @@ const getPreviousEvent = async (req, res) => {
 
     try {
         const event = await
-            Event.findOne({ date: { $lt: currentDate } })
+            RepairEvent.findOne({ date: { $lt: currentDate } })
                 .sort({ date: -1 });
         if (!event) {
             return sendResponse(res, 'No previous events found');
@@ -253,7 +257,7 @@ const getNextEvent = async (req, res) => {
 
     try {
         const event = await
-            Event.findOne({ date: { $gt: currentDate } })
+            RepairEvent.findOne({ date: { $gt: currentDate } })
                 .sort({ date: -1 });
         if (!event) {
             return sendResponse(res, 'No events found');
