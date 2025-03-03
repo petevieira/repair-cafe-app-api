@@ -36,7 +36,7 @@ router.put("/update-repair",
   repairsController.updateRepair
 );
 
-router.get("/get-repairs-basic/:date",
+router.get("/get-repairs-basic/:eventId",
     repairsController.getRepairsBasic
 );
 

@@ -14,6 +14,7 @@ const {
     extractErrorMessage
 } = require('../helpers/rest-helpers');
 const { emailIsSubscribed } = require('./subscribers-controller');
+const mongoose = require('mongoose');
 
 async function addFullRepair(req, res) {
     const result = validateRequest(req.body, [
@@ -97,11 +98,11 @@ async function addFullRepair(req, res) {
 
 async function updateRepair(req, res) {
     const result = validateRequest(req.body, [
+        '_id',
         'acceptsWaiver',
         'brand',
         'cost',
         'eventId',
-        '_id',
         'isFollowUpRepair',
         'model',
         'ownersEmail',
@@ -124,11 +125,11 @@ async function updateRepair(req, res) {
 
     try {
         let {
+            _id,
             acceptsWaiver,
             brand,
             cost,
             eventId,
-            _id,
             isFollowUpRepair,
             model,
             ownersEmail,
@@ -211,23 +212,20 @@ async function getRepair(req, res) {
 * @returns
 */
 async function getRepairsBasic(req, res) {
-    const result = validateRequest(req.params, ['date']);
+    const result = validateRequest(req.params, ['eventId']);
     if (result !== true) {
         return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
     }
-
-    const date = new Date(req.params.date);
-    let datePlus24h = new Date(req.params.date);
-    datePlus24h.setDate(date.getDate() + 1);
+    const eventId = req.params.eventId;
+    if (!mongoose.Types.ObjectId.isValid(eventId)) {
+        return sendResponse(res, "Invalid eventId", {}, StatusCodes.BAD_REQUEST);
+    }
 
     try {
         const repairs = await Repair.aggregate([
             {
                 $match: {
-                    createdAt: {
-                        $gte: date,
-                        $lt: datePlus24h
-                    }
+                    eventId: mongoose.Types.ObjectId(eventId),
                 }
             },
             {

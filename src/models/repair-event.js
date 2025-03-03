@@ -17,4 +17,4 @@ const repairEventSchema = new Schema(
 );
 
 // export the model for use in the app
-module.exports = mongoose.model("RepairEvent", repairEventSchema);
+module.exports = mongoose.model("RepairEvent", repairEventSchema, "repair_events");

@@ -7,6 +7,7 @@
 
 const { StatusCodes } = require('http-status-codes'); // for HTTP status codes
 const RepairEvent = require('../models/repair-event'); // import model
+const Repair = require('../models/repair'); // import model
 const { sendResponse, validateRequest } = require('../helpers/rest-helpers');
 
 /**
@@ -62,6 +63,18 @@ const deleteEventById = async (req, res) => {
 
     const id = req.params.id;
 
+    // Check if any repairs are associated with this event
+    const repairs = await Repair.find({ eventId: id });
+    if (repairs.length > 0) {
+        return sendResponse(
+            res,
+            `Event with id ${id} has associated repairs. Cannot delete.`,
+            {},
+            StatusCodes.BAD_REQUEST
+        );
+    }
+
+    // No repairs associated with event, delete event
     try {
         const event = await RepairEvent.findOneAndDelete({ _id: id });
 
