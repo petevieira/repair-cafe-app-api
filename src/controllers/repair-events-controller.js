@@ -222,13 +222,21 @@ const getEventByDate = async (req, res) => {
     }
 }
 
-const getPreviousEvent = async (req, res) => {
+/**
+ * Find the previous event given a current date.
+ * @param {*} req - Request object
+ * @param {*} req.body - Request body
+ * @param {string} req.body.currentDate - Current date at midnight UTC
+ * @param {*} res - Response object
+ * @returns {object} - Response object with status, message, and previous event
+ */
+const findPreviousEvent = async (req, res) => {
     const result = validateRequest(req.body, ['currentDate']);
     if (result !== true) {
         return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
     }
 
-    currentDate = new Date(req.body.currentDate);
+    const currentDate = new Date(req.body.currentDate);
     if (
         !currentDate ||
         currentDate.getUTCHours() !== 0 ||
@@ -239,20 +247,29 @@ const getPreviousEvent = async (req, res) => {
     }
 
     try {
-        const event = await
-            RepairEvent.findOne({ date: { $lt: currentDate } })
-                .sort({ date: -1 });
-        if (!event) {
+        const previousEvent = await RepairEvent
+            .findOne({ date: { $lt: currentDate } })
+            .sort({ date: -1 });
+
+        if (!previousEvent) {
             return sendResponse(res, 'No previous events found');
         }
-        return sendResponse(res, 'Prevoius event retrieved', { event });
+        return sendResponse(res, 'Prevoius event retrieved', { previousEvent });
     } catch (error) {
         console.error(error);
         return sendResponse(res, 'Error retrieving previous event', {}, StatusCodes.INTERNAL_SERVER_ERROR);
     }
 };
 
-const getNextEvent = async (req, res) => {
+/**
+ * Find the next event given a current date.
+ * @param {*} req - Request object
+ * @param {*} req.body - Request body
+ * @param {string} req.body.currentDate - Current date at midnight UTC
+ * @param {*} res - Response object
+ * @returns {object} - Response object with status, message, and next event
+ */
+const findNextEvent = async (req, res) => {
     const result = validateRequest(req.body, ['currentDate']);
     if (result !== true) {
         return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
@@ -269,13 +286,14 @@ const getNextEvent = async (req, res) => {
     }
 
     try {
-        const event = await
-            RepairEvent.findOne({ date: { $gt: currentDate } })
-                .sort({ date: -1 });
-        if (!event) {
+        const nextEvent = await RepairEvent
+            .findOne({ date: { $gt: currentDate } })
+            .sort({ date: 1 });
+
+        if (!nextEvent) {
             return sendResponse(res, 'No events found');
         }
-        return sendResponse(res, 'Next event retrieved', { event });
+        return sendResponse(res, 'Next event retrieved', { nextEvent });
     } catch (error) {
         console.error(error);
         return sendResponse(res, 'Error retrieving next event', {}, StatusCodes.INTERNAL_SERVER_ERROR);
@@ -290,6 +308,6 @@ module.exports = {
     getEventById,
     getMostRecentEvent,
     getEventByDate,
-    getPreviousEvent,
-    getNextEvent,
+    findPreviousEvent,
+    findNextEvent,
 };

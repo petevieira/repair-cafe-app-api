@@ -56,16 +56,16 @@ router.post("/get-most-recent-event/",
     repairEventsController.getMostRecentEvent,
 );
 
-router.post("/get-previous-event/",
+router.post("/find-previous-event/",
     authenticateToken,
     requireSignin,
-    repairEventsController.getPreviousEvent,
+    repairEventsController.findPreviousEvent,
 )
 
-router.post("/get-next-event/",
+router.post("/find-next-event/",
     authenticateToken,
     requireSignin,
-    repairEventsController.getNextEvent,
+    repairEventsController.findNextEvent,
 )
 
 module.exports = router;
