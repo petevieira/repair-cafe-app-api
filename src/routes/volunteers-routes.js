@@ -16,49 +16,59 @@ const router = express.Router();
  * 2024-01-02T07:00:00.000Z // start of Jan 2nd in Arizona in UTC time
  */
 router.get("/get-days-volunteers/:date",
-  volunteersController.getDaysVolunteers
+    authenticateToken,
+    requireSignin,
+    requireIsVolunteer,
+    volunteersController.getDaysVolunteers
 );
 
+router.get("/get-volunteers-by-event/:eventId",
+    authenticateToken,
+    requireSignin,
+    requireIsVolunteer,
+    volunteersController.getVolunteersByEvent
+)
+
 router.get("/get-past-volunteers",
-  authenticateToken,
-  requireSignin,
-  requireIsVolunteer,
-  volunteersController.getPastVolunteers
+    authenticateToken,
+    requireSignin,
+    requireIsVolunteer,
+    volunteersController.getPastVolunteers
 );
 
 router.get("/find-volunteer-by-email/:email",
-  authenticateToken,
-  requireSignin,
-  requireIsVolunteer,
-  volunteersController.findVolunteerByEmail
+    authenticateToken,
+    requireSignin,
+    requireIsVolunteer,
+    volunteersController.findVolunteerByEmail
 );
 
 router.post("/add-volunteer",
-  authenticateToken,
-  requireSignin,
-  requireIsVolunteer,
-  volunteersController.addVolunteer
+    authenticateToken,
+    requireSignin,
+    requireIsVolunteer,
+    volunteersController.addVolunteer
 );
 
 router.delete("/delete-volunteer/:id",
-  authenticateToken,
-  requireSignin,
-  requireIsAdmin,
-  volunteersController.deleteVolunteer
+    authenticateToken,
+    requireSignin,
+    requireIsAdmin,
+    volunteersController.deleteVolunteer
 );
 
 router.put("/update-volunteer",
-  authenticateToken,
-  requireSignin,
-  requireIsVolunteer,
-  volunteersController.updateVolunteer
+    authenticateToken,
+    requireSignin,
+    requireIsVolunteer,
+    volunteersController.updateVolunteer
 );
 
 router.get("/get-volunteer/:id",
-  authenticateToken,
-  requireSignin,
-  requireIsVolunteer,
-  volunteersController.getVolunteer
+    authenticateToken,
+    requireSignin,
+    requireIsVolunteer,
+    volunteersController.getVolunteer
 );
 
 module.exports = router;

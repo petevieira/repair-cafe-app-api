@@ -31,6 +31,9 @@ const requireIsVolunteer = async (req, res, next) => {
     try {
       // you get req.user._id from verified jwt token
       const user = await User.findById(req.auth._id);
+      if (!user?.role) {
+        return sendResponse(res, 'Unauthorized', {}, StatusCodes.UNAUTHORIZED);
+      }
       if (user.role !== "volunteer" && user.role !== "admin") {
         return sendResponse(res, 'Unauthorized', {}, StatusCodes.UNAUTHORIZED);
       } else {

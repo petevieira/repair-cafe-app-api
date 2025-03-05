@@ -44,7 +44,6 @@ async function signIn(req, res) {
 
     try {
         const { email, password } = req.body;
-        console.debug(`User attempting to sign in with email: ${email}, password: ${password}`);
 
         // check if our db has user with that email
         const user = await User.findOne({ email: email });

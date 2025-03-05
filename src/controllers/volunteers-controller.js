@@ -6,6 +6,7 @@ const {
     validateRequest,
     toLowerCapFirstLetter
 } = require('../helpers/rest-helpers');
+const mongoose = require('mongoose');
 
 async function addVolunteer(req, res) {
     // Check for required request params
@@ -147,6 +148,42 @@ async function getDaysVolunteers(req, res) {
     }
 }
 
+async function getVolunteersByEvent(req, res) {
+    const result = validateRequest(req.params, ['eventId']);
+    if (result !== true) {
+        return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
+    }
+
+    const eventId = req.params.eventId;
+    if (!mongoose.Types.ObjectId.isValid(eventId)) {
+        return sendResponse(res, "Invalid eventId", {}, StatusCodes.BAD_REQUEST);
+    }
+
+    try {
+        const volunteers = await Volunteer.aggregate([
+            {
+                $match: {
+                    eventId: mongoose.Types.ObjectId(eventId)
+                }
+            },
+            {
+                $project: {
+                    _id: 1,
+                    firstName: 1,
+                    lastName: 1,
+                },
+            }
+        ]);
+        return sendResponse(
+            res,
+            `Found ${volunteers.length} volunteer(s) for event ${req.params.eventId}`,
+            { volunteers: volunteers }
+        );
+    } catch (err) {
+        return sendResponse(res, err, {}, StatusCodes.INTERNAL_SERVER_ERROR);
+    }
+}
+
 async function getPastVolunteers(req, res) {
     try {
         const volunteers = await Volunteer.aggregate(
@@ -207,6 +244,12 @@ async function findVolunteerByEmail(req, res) {
 }
 
 module.exports = {
-    addVolunteer, updateVolunteer, deleteVolunteer, getDaysVolunteers,
-    getVolunteer, getPastVolunteers, findVolunteerByEmail
+    addVolunteer,
+    updateVolunteer,
+    deleteVolunteer,
+    getDaysVolunteers,
+    getVolunteer,
+    getPastVolunteers,
+    findVolunteerByEmail,
+    getVolunteersByEvent,
 };

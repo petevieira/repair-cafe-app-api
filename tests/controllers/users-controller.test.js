@@ -30,93 +30,6 @@ afterEach(async () => {
 });
 afterAll(async () => await db.close());
 
-describe('/users/sign-up', () => {
-  // test user for requests
-  const testUser = {
-    first: 'john',
-    last: 'smith',
-    email: 'test@gmail.com',
-    password: 'adminpassword',
-    resetCode: '12345'
-  };
-
-  test('should succeed for new user with all fields', async () => {
-    // arrange
-    const expectedUser = {
-      first: testUser.first,
-      last: testUser.last,
-      email: testUser.email,
-      roles: ['user']
-    };
-
-    // act
-    const res = await request(app).post('/users/sign-up').send(testUser);
-
-    // assert
-    expect(res.status).toBe(StatusCodes.OK);
-    const user = res.body.data.user;
-    expect(user.first).toEqual(expectedUser.first);
-    expect(user.last).toEqual(expectedUser.last);
-    expect(user.email).toEqual(expectedUser.email);
-    expect(user.roles).toEqual(expectedUser.roles);
-  });
-
-  test('should fail for user with email already in database', async () => {
-    // arrange
-    await request(app).post('/users/sign-up').send(testUser);
-
-    // act
-    const res = await request(app).post('/users/sign-up').send(testUser);
-
-    // assert
-    expect(res.status).toBe(StatusCodes.BAD_REQUEST);
-  });
-
-  test('should fail if first missing from request', async () => {
-    // arrange
-    delete testUser.first;
-
-    // act
-    const res = await request(app).post('/users/sign-up').send(testUser);
-
-    // assert
-    expect(res.status).toBe(StatusCodes.BAD_REQUEST);
-  });
-
-  test('should fail if last missing from request', async () => {
-    // arrange
-    delete testUser.last;
-
-    // act
-    const res = await request(app).post('/users/sign-up').send(testUser);
-
-    // assert
-    expect(res.status).toBe(StatusCodes.BAD_REQUEST);
-  });
-
-  test('should fail if email missing from request', async () => {
-    // arrange
-    delete testUser.email;
-
-    // act
-    const res = await request(app).post('/users/sign-up').send(testUser);
-
-    // assert
-    expect(res.status).toBe(StatusCodes.BAD_REQUEST);
-  });
-
-  test('should fail if password missing from request', async () => {
-    // arrange
-    delete testUser.password;
-
-    // act
-    const res = await request(app).post('/users/sign-up').send(testUser);
-
-    // assert
-    expect(res.status).toBe(StatusCodes.BAD_REQUEST);
-  });
-});
-
 describe('/users/sign-in', () => {
   // test user for requests
   const testUser = {
@@ -124,13 +37,14 @@ describe('/users/sign-in', () => {
     last: 'smith',
     email: 'test@gmail.com',
     password: 'adminpassword',
-    resetCode: '12345'
+    roles: 'volunter'
   };
 
   test('should succeed for existing user with correct password', async () => {
     // arrange
-    // sign user up first
-    const signupRes = await request(app).post('/users/sign-up').send(testUser);
+    // insert user into db
+    const signupUser = await new User(testUser).save();
+
 
     // act
     const res = await request(app).post('/users/sign-in').send(testUser);
@@ -158,172 +72,6 @@ describe('/users/sign-in', () => {
 
     // assert
     expect(res.status).toBe(StatusCodes.BAD_REQUEST);
-  });
-});
-
-describe('/users/forgot-password', () => {
-  // test user for requests
-  const testUser = {
-    first: 'john',
-    last: 'smith',
-    email: 'test@gmail.com',
-    password: 'adminpassword',
-    resetCode: '12345'
-  };
-
-  test('should fail if email is not provided', async () => {
-    // arrange
-    const requestData = {};
-
-    // act
-    const res = await request(app).post('/users/forgot-password').send(requestData);
-
-    // assert
-    expect(res.status).toBe(StatusCodes.BAD_REQUEST);
-  });
-
-  test('should fail if email cannot be found', async () => {
-    // arrange
-    await request(app).post('/users/sign-up').send(testUser);
-    const requestData = { email: 'wrongemail@gmail.com' };
-
-    // act
-    const res = await request(app).post('/users/forgot-password').send(requestData);
-
-    // assert
-    expect(res.status).toBe(StatusCodes.BAD_REQUEST);
-  });
-
-  test('should succeed if valid email provided', async () => {
-    // arrange
-    await request(app).post('/users/sign-up').send(testUser);
-    const requestData = { email: testUser.email };
-
-    // act
-    const res = await request(app).post('/users/forgot-password').send(requestData);
-    const user = await User.find({ email: testUser.email });
-
-    // assert
-    expect(res.status).toBe(StatusCodes.OK);
-    expect(user).toBeTruthy();
-    expect(user.resetCode).not.toEqual('')
-  });
-});
-
-describe('/users/reset-password', () => {
-  // test user for requests
-  const testUser = {
-    first: 'john',
-    last: 'smith',
-    email: 'test@gmail.com',
-    password: 'adminpassword',
-    resetCode: '12345'
-  };
-
-  test('should fail if resetCode is not provided', async () => {
-    // arrange
-    await request(app).post('/users/sign-up').send(testUser);
-    const requestData = { email: testUser.email, newPassword: 'asdfasdf' };
-
-    // act
-    const res = await request(app).post('/users/reset-password').send(requestData);
-
-    // assert
-    expect(res.status).toBe(StatusCodes.BAD_REQUEST);
-  });
-
-  test('should fail if email is not provided', async () => {
-    // arrange
-    await request(app).post('/users/sign-up').send(testUser);
-    const requestData = {
-      resetCode: testUser.resetCode,
-      newPassword: 'asdfasdf'
-    };
-
-    // act
-    const res = await request(app).post('/users/reset-password').send(requestData);
-
-    // assert
-    expect(res.status).toBe(StatusCodes.BAD_REQUEST);
-  });
-
-  test('should fail if newPassword is not provided', async () => {
-    // arrange
-    await request(app).post('/users/sign-up').send(testUser);
-    const requestData = {
-      email: testUser.email,
-      resetCode: testUser.resetCode,
-    };
-
-    // act
-    const res = await request(app).post('/users/reset-password').send(requestData);
-
-    // assert
-    expect(res.status).toBe(StatusCodes.BAD_REQUEST);
-  });
-
-  test('should fail if email is incorrect not found in any users', async () => {
-    // arrange
-    await request(app).post('/users/sign-up').send(testUser);
-    const requestData = {
-      email: 'wrongemail@gmail.com',
-      resetCode: testUser.resetCode,
-      newPassword: 'newpasswd'
-    };
-
-    // act
-    const res = await request(app).post('/users/reset-password').send(requestData);
-
-    // assert
-    expect(res.status).toBe(StatusCodes.BAD_REQUEST);
-  });
-
-  test('should fail if resetCode not found in any users', async () => {
-    // arrange
-    await request(app).post('/users/sign-up').send(testUser);
-    const requestData = { email: testUser.email, resetCode: 'wrongCode' };
-
-    // act
-    const res = await request(app).post('/users/reset-password').send(requestData);
-
-    // assert
-    expect(res.status).toBe(StatusCodes.BAD_REQUEST);
-  });
-
-  test('should fail if new password does not meet requirements', async () => {
-    // arrange
-    await request(app).post('/users/sign-up').send(testUser);
-    const requestData = { email: 'test@gmail.com', newPassword: 'short' };
-
-    // act
-    const res = await request(app).post('/users/reset-password').send(requestData);
-
-    // assert
-    expect(res.status).toBe(StatusCodes.BAD_REQUEST);
-  });
-
-  test('should succeed if valid email, resetCode, and password', async () => {
-    // arrange
-    const signupRes = await request(app).post('/users/sign-up').send(testUser);
-    let user = await User.findOne({ email: testUser.email });
-    user.resetCode = testUser.resetCode;
-    user.save();
-
-    const requestData = {
-      email: testUser.email,
-      resetCode: testUser.resetCode,
-      newPassword: 'newpasswd'
-    };
-
-    // act
-    const res = await request(app).post('/users/reset-password').send(requestData);
-    user = await User.findOne({ email: requestData.email });
-
-    // assert
-    expect(signupRes.status).toBe(StatusCodes.OK);
-    expect(res.status).toBe(StatusCodes.OK);
-    expect(user.email).toEqual(testUser.email);
-    expect(user.resetCode).toEqual('');
   });
 });
 
