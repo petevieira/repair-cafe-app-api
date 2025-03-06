@@ -14,12 +14,12 @@ require("dotenv").config(); // parse .env file
 
 async function emailIsRegistered(req, res) {
     // Check for required request params
-    const result = validateRequest(req.params, ['email']);
+    const result = validateRequest(req.body, ['email']);
     if (result !== true) {
         return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
     }
 
-    const email = req.params.email;
+    const email = req.body.email;
 
     try {
         const user = await User.findOne({ email: email });

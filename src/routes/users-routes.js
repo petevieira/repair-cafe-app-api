@@ -11,8 +11,12 @@ const { authenticateToken, requireIsAdmin, requireSignin } = require('../middlew
 
 const router = express.Router(); // create ExpressJS router
 
-router.get("/email-is-registered/:email", usersController.emailIsRegistered);
-router.post("/sign-in", usersController.signIn);
+router.post("/email-is-registered",
+    usersController.emailIsRegistered
+);
+router.post("/sign-in",
+    usersController.signIn
+);
 router.post("/signed-in-user-is-admin",
     authenticateToken,
     requireSignin,
