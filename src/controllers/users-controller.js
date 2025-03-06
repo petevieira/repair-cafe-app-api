@@ -4,21 +4,15 @@
 * @module users-controller
 * @description controller actions for user authentication endpoints
 * @requires jsonwebtoken
-* @requires nanoid
 */
 
-const nanoid = require('nanoid'); // to generate unique reset code
 const { StatusCodes } = require('http-status-codes'); // for HTTP status codes
 const User = require('../models/user'); // import User model
 const { comparePassword, createSignedToken } = require('../helpers/auth-helpers'); // password helpers
 const { sendResponse, validateRequest } = require('../helpers/rest-helpers'); // validator
 require("dotenv").config(); // parse .env file
-// const sgMail = require("@sendgrid/mail"); // for sending emails
 
-// configure SendGrid email API
-// sgMail.setApiKey(process.env.SENDGRID_KEY);
-
-async function userIsAdmin(req, res) {
+async function emailIsRegistered(req, res) {
     // Check for required request params
     const result = validateRequest(req.params, ['email']);
     if (result !== true) {
@@ -31,23 +25,17 @@ async function userIsAdmin(req, res) {
         const user = await User.findOne({ email: email });
         if (!user) {
             return sendResponse(
-                res, `User with email ${email} not found`, {}, StatusCodes.BAD_REQUEST
+                res, `User with email ${email} not found`, { isRegistered: false }, StatusCodes.BAD_REQUEST
             );
         }
-        if (user.role !== "admin") {
-            return sendResponse(
-                res, `User with email ${email} isn't an admin`,
-                {}, StatusCodes.BAD_REQUEST
-            );
-        }
-        return sendResponse(res, `User with email ${email} is an admin`);
+        return sendResponse(res, `User with email ${email} is an admin`, { isRegistered: true });
     } catch (err) {
         console.error(err);
         return sendResponse(res, err, {}, StatusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 
-async function signInAdmin(req, res) {
+async function signIn(req, res) {
     // Check for required request params
     const result = validateRequest(req.body, ['email', 'password']);
     if (result !== true) {
@@ -65,7 +53,7 @@ async function signInAdmin(req, res) {
             );
         }
 
-        if (user.role !== "admin") {
+        if (user.role !== "volunteer" && user.role !== "admin") {
             return sendResponse(
                 res, `User with email ${email} not admin`, {}, StatusCodes.UNAUTHORIZED
             );
@@ -100,4 +88,35 @@ async function signInAdmin(req, res) {
     }
 }
 
-module.exports = { signInAdmin, userIsAdmin };
+const signedInUserIsAdmin = async (req, res) => {
+    // Get user from auth
+    const authUser = req.auth._id;
+    if (!authUser) {
+        return sendResponse(res, 'No auth user found in request', {}, StatusCodes.BAD_REQUEST);
+    }
+
+    if (authUser.role !== "admin") {
+        return sendResponse(res, 'User is not an admin', { isAdmin: false });
+    }
+
+    const id = authUser._id;
+
+    // Get user by authUser _id
+    const user = await User
+        .findOne({ _id: id })
+        .select(['role', 'email']);
+
+    if (!user) {
+        return sendResponse(res, `No user found with id ${id}`, {}, StatusCodes.BAD_REQUEST);
+    }
+    if (user.role !== "admin") {
+        return sendResponse(res, `User with email ${user.email} not an admin`, { isAdmin: false });
+    }
+    return sendResponse(res, `User with email ${user.email} is an admin`, { isAdmin: true });
+}
+
+module.exports = {
+    signIn,
+    emailIsRegistered,
+    signedInUserIsAdmin,
+};

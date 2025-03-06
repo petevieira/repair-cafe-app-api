@@ -9,7 +9,7 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 // create item schema
-const itemSchema = new Schema(
+const repairSchema = new Schema(
   {
     acceptsWaiver: {
       $type: String,
@@ -29,7 +29,6 @@ const itemSchema = new Schema(
     ownersLastName: {
       $type: String,
       trim: true,
-      required: true,
     },
     product: {
       $type: String,
@@ -98,6 +97,11 @@ const itemSchema = new Schema(
     imagesUrls: [{
       $type: String
     }],
+    eventId: {
+      $type: Schema.Types.ObjectId,
+      ref: 'RepairEvent',
+      required: true
+    },
   },
   {
     typeKey: '$type',
@@ -106,4 +110,4 @@ const itemSchema = new Schema(
 );
 
 // export the user model for use in the app
-module.exports = mongoose.model("Item", itemSchema);
+module.exports = mongoose.model("Repair", repairSchema);

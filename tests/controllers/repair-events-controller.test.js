@@ -9,7 +9,7 @@ const { StatusCodes } = require('http-status-codes'); // for HTTP status codes
 
 const app = require('../../src/app');
 const db = require('../database/test-database-config');
-const Event = require('../../src/models/event');
+const RepairEvent = require('../../src/models/repair-event');
 const Auth = require('../../src/helpers/auth-helpers');
 
 let token;
@@ -22,7 +22,7 @@ beforeEach(async () => {
 afterEach(async () => await db.clear());
 afterAll(async () => await db.close());
 
-describe('/events/add-event', () => {
+describe('/repair-events/create-event', () => {
   // create test event for requests
   const testEvent = {
     title: 'Second Saturday Repair Event',
@@ -39,12 +39,12 @@ describe('/events/add-event', () => {
 
     // act
     const res = await request(app)
-      .post('/events/add-event')
+      .post('/repair-events/create-event')
       .set('Authorization', `Bearer ${token}`)
       .send(testEvent);
 
     // assert
-    const event = await Event.findOne({ locationName: testEvent.locationName });
+    const event = await RepairEvent.findOne({ locationName: testEvent.locationName });
     expect(event).toBeTruthy();
     expect(event.title).toEqual(testEvent.title);
     expect(event.locationName).toEqual(testEvent.locationName);
@@ -57,18 +57,18 @@ describe('/events/add-event', () => {
 
     // act
     const res = await request(app)
-      .post('/events/add-event')
+      .post('/repair-events/create-event')
       .set('Authorization', `Bearer ${token}`)
       .send(testEvent);
 
     // assert
     expect(res.status).toBe(StatusCodes.BAD_REQUEST);
-    const event = await Event.findOne({ locationName: testEvent.locationName });
+    const event = await RepairEvent.findOne({ locationName: testEvent.locationName });
     expect(event).toBeFalsy();
   });
 });
 
-describe('/events/delete-event', () => {
+describe('/repair-events/delete-event-by-id', () => {
   // create test event for requests
   const testEvent = {
     title: 'Second Saturday Repair Event',
@@ -84,14 +84,13 @@ describe('/events/delete-event', () => {
 
   test('should succeed with correct params, event exiting', async () => {
     // arrange
-    const event = await new Event(testEvent).save();
+    const event = await new RepairEvent(testEvent).save();
 
     // act
     const res = await request(app)
-      .post('/events/delete-event')
-      .set('Authorization', `Bearer ${token}`)
-      .send({ eventId: event._id });
-    const events = await Event.find();
+      .delete('/repair-events/delete-event-by-id/' + event._id)
+      .set('Authorization', `Bearer ${token}`);
+    const events = await RepairEvent.find();
 
     // assert
     expect(res.status).toBe(StatusCodes.OK);
@@ -103,17 +102,16 @@ describe('/events/delete-event', () => {
 
     // act
     const res = await request(app)
-      .post('/events/delete-event')
+      .delete('/repair-events/delete-event-by-id/09325')
       .set('Authorization', `Bearer ${token}`)
-      .send({ eventId: "09325" });
-    const events = await Event.find();
+    const events = await RepairEvent.find();
 
     // assert
     expect(res.status).toBe(StatusCodes.BAD_REQUEST);
   });
 });
 
-describe('/events/update-event', () => {
+describe('/repair-events/update-event', () => {
   // create test event for requests
   const testEvent = {
     title: 'Second Saturday Repair Event',
@@ -129,17 +127,17 @@ describe('/events/update-event', () => {
 
   test('should succeed with correct params, event exiting', async () => {
     // arrange
-    const event = await new Event(testEvent).save();
+    const event = await new RepairEvent(testEvent).save();
 
     // act
     const res = await request(app)
-      .post('/events/update-event')
+      .post('/repair-events/update-event')
       .set('Authorization', `Bearer ${token}`)
       .send({ updatedEvent: {
         _id: event._id,
         title: "Updated title" }
       });
-    const events = await Event.find();
+    const events = await RepairEvent.find();
 
     // assert
     expect(res.status).toBe(StatusCodes.OK);
@@ -151,13 +149,13 @@ describe('/events/update-event', () => {
 
     // act
     const res = await request(app)
-      .post('/events/update-event')
+      .post('/repair-events/update-event')
       .set('Authorization', `Bearer ${token}`)
       .send({ updatedEvent: {
         _id: 'aaaaaaaaaaaaaaaaaaaaaaaa',
         title: "Updated title" }
       });
-    const events = await Event.find();
+    const events = await RepairEvent.find();
 
     // assert
     expect(res.status).toBe(StatusCodes.BAD_REQUEST);

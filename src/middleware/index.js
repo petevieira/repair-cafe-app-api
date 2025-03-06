@@ -27,6 +27,24 @@ const requireIsAdmin = async (req, res, next) => {
   }
 };
 
+const requireIsVolunteer = async (req, res, next) => {
+    try {
+      // you get req.user._id from verified jwt token
+      const user = await User.findById(req.auth._id);
+      if (!user?.role) {
+        return sendResponse(res, 'Unauthorized', {}, StatusCodes.UNAUTHORIZED);
+      }
+      if (user.role !== "volunteer" && user.role !== "admin") {
+        return sendResponse(res, 'Unauthorized', {}, StatusCodes.UNAUTHORIZED);
+      } else {
+        // user is an volunteer
+        next();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
 /**
  * ExpressJS middleware to authenticate JSON web token before allowing
  * client requests through. The authorization token is a bearer token that
@@ -46,6 +64,7 @@ const authenticateToken = async (req, res, next) => {
 
   try {
     const decodedPayload = await verifyClientToken(token);
+
     // store decoded userId in request object for next function to use
     req.userId = decodedPayload._id;
     next(); // redirect back to requested endpoint
@@ -71,4 +90,10 @@ const verifyClientToken = (token) => {
   );
 }
 
-module.exports = { requireSignin, requireIsAdmin, authenticateToken, verifyClientToken };
+module.exports = {
+    requireSignin,
+    requireIsAdmin,
+    authenticateToken,
+    verifyClientToken,
+    requireIsVolunteer,
+};

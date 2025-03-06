@@ -65,4 +65,18 @@ function toLowerCapFirstLetter(str) {
   return (newStr.charAt(0).toUpperCase() + newStr.slice(1));
 }
 
-module.exports = { sendResponse, objectHasRequiredProperties, validateRequest, toLowerCapFirstLetter };
+function extractErrorMessage(error) {
+    // Extract the most meaningful error message
+    return error.response?.data?.message || // API response error (Axios)
+        error.message || // Standard JavaScript errors
+        error.msg || // Custom error object
+        "An unknown error occurred."; // Default fallback
+}
+
+module.exports = {
+    sendResponse,
+    objectHasRequiredProperties,
+    validateRequest,
+    toLowerCapFirstLetter,
+    extractErrorMessage,
+};

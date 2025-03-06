@@ -1,7 +1,9 @@
 
 const express = require('express'); // for access to ExpressJS router
 const volunteersController = require('../controllers/volunteers-controller');
-const { authenticateToken, requireIsAdmin, requireSignin } = require('../middleware');
+const {
+    authenticateToken, requireIsAdmin, requireSignin, requireIsVolunteer,
+} = require('../middleware');
 
 // Create ExpressJS router
 const router = express.Router();
@@ -14,49 +16,59 @@ const router = express.Router();
  * 2024-01-02T07:00:00.000Z // start of Jan 2nd in Arizona in UTC time
  */
 router.get("/get-days-volunteers/:date",
-  volunteersController.getDaysVolunteers
+    authenticateToken,
+    requireSignin,
+    requireIsVolunteer,
+    volunteersController.getDaysVolunteers
 );
 
+router.get("/get-volunteers-by-event/:eventId",
+    authenticateToken,
+    requireSignin,
+    requireIsVolunteer,
+    volunteersController.getVolunteersByEvent
+)
+
 router.get("/get-past-volunteers",
-  authenticateToken,
-  requireSignin,
-  requireIsAdmin,
-  volunteersController.getPastVolunteers
+    authenticateToken,
+    requireSignin,
+    requireIsVolunteer,
+    volunteersController.getPastVolunteers
 );
 
 router.get("/find-volunteer-by-email/:email",
-  authenticateToken,
-  requireSignin,
-  requireIsAdmin,
-  volunteersController.findVolunteerByEmail
+    authenticateToken,
+    requireSignin,
+    requireIsVolunteer,
+    volunteersController.findVolunteerByEmail
 );
 
 router.post("/add-volunteer",
-  authenticateToken,
-  requireSignin,
-  requireIsAdmin,
-  volunteersController.addVolunteer
+    authenticateToken,
+    requireSignin,
+    requireIsVolunteer,
+    volunteersController.addVolunteer
 );
 
 router.delete("/delete-volunteer/:id",
-  authenticateToken,
-  requireSignin,
-  requireIsAdmin,
-  volunteersController.deleteVolunteer
+    authenticateToken,
+    requireSignin,
+    requireIsAdmin,
+    volunteersController.deleteVolunteer
 );
 
 router.put("/update-volunteer",
-  authenticateToken,
-  requireSignin,
-  requireIsAdmin,
-  volunteersController.updateVolunteer
+    authenticateToken,
+    requireSignin,
+    requireIsVolunteer,
+    volunteersController.updateVolunteer
 );
 
 router.get("/get-volunteer/:id",
-  authenticateToken,
-  requireSignin,
-  requireIsAdmin,
-  volunteersController.getVolunteer
+    authenticateToken,
+    requireSignin,
+    requireIsVolunteer,
+    volunteersController.getVolunteer
 );
 
 module.exports = router;
