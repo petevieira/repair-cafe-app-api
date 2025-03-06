@@ -30,19 +30,19 @@ const addSubscriber = async (req, res) => {
   } catch (error) {
     console.error(error);
     return sendResponse(
-        res, 'Error adding subscriber', {}, StatusCodes.INTERNAL_SERVER_ERROR
+        res, 'Error adding subscriber. ' + error.message, {}, StatusCodes.INTERNAL_SERVER_ERROR
     );
   }
 }
 
 const deleteSubscriber = async (req, res) => {
-  const result = validateRequest(req.params, ['email']);
+  const result = validateRequest(req.body, ['email']);
 
   if (result !== true) {
     return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
   }
 
-  const email = req.params.email;
+  const email = req.body.email;
 
   try {
     const subscriber = await Subscriber.findOneAndDelete({ email });
@@ -51,11 +51,13 @@ const deleteSubscriber = async (req, res) => {
       return sendResponse(res, `${email} is not a subscriber`);
     }
 
-    return sendResponse(res, `${email} deleted from subscribers`);
+    const msg = subscriber.deletedCount > 0 ? `Subscriber ${id} deleted` : "Subscriber not found";
+
+    return sendResponse(res, msg, { subscriber });
   } catch (error) {
     console.error(error);
     return sendResponse(
-        res, 'Error deleting subscriber', {}, StatusCodes.INTERNAL_SERVER_ERROR
+        res, 'Error deleting subscriber. ' + error.message, {}, StatusCodes.INTERNAL_SERVER_ERROR
     );
   }
 }
@@ -68,7 +70,7 @@ const getSubscribers = async (req, res) => {
   } catch (error) {
     console.error(error);
     return sendResponse(
-        res, 'Error retrieving subscribers', {}, StatusCodes.INTERNAL_SERVER_ERROR
+        res, 'Error retrieving subscribers. ' + error.message, {}, StatusCodes.INTERNAL_SERVER_ERROR
     );
   }
 }
@@ -86,14 +88,14 @@ const isEmailSubscribed = async (req, res) => {
         const subscriber = await Subscriber.findOne({ email });
 
         if (!subscriber) {
-        return sendResponse(res, `${email} is not a subscriber`, { subscribed: false});
+            return sendResponse(res, `${email} is not subscribed`, { isSubscribed: false});
         }
 
-        return sendResponse(res, `${email} is a subscriber`, { subscribed: true });
+        return sendResponse(res, `${email} is subscribed`, { isSubscribed: true });
     } catch (error) {
         console.error(error);
         return sendResponse(
-            res, 'Error finding subscriber', {}, StatusCodes.INTERNAL_SERVER_ERROR
+            res, 'Error finding subscriber. ' + error.message, {}, StatusCodes.INTERNAL_SERVER_ERROR
         );
     }
 }

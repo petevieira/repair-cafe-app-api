@@ -229,6 +229,11 @@ async function getRepairsBasic(req, res) {
                 }
             },
             {
+                $sort: {
+                    createdAt: 1,
+                }
+            },
+            {
                 $project: {
                     _id: 1,
                     ownersFirstName: 1,
@@ -246,11 +251,13 @@ async function getRepairsBasic(req, res) {
                             ''
                         ]
                     },
-                    repairStatus: 1
+                    repairStatus: 1,
+                    isFollowUpRepair: 1,
+                    createdAt: 1,
                 }
             }
         ]);
-        return sendResponse(res, `Found ${repairs.length} repairs(s)`, { repairs: repairs });
+        return sendResponse(res, `Found ${repairs.length} repairs(s)`, { repairs });
     } catch (error) {
         console.error(error);
     }

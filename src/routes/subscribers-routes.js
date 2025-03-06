@@ -8,7 +8,9 @@
 // for access to ExpressJS router
 const express = require('express'); // for access to ExpressJS router
 const subscribersController = require("../controllers/subscribers-controller");
-const { authenticateToken, requireIsAdmin, requireSignin } = require('../middleware');
+const {
+    authenticateToken, requireIsAdmin, requireSignin, requireIsVolunteer
+} = require('../middleware');
 
 // create ExpressJS router
 const router = express.Router();
@@ -23,21 +25,21 @@ router.get("/get-subscribers",
 router.post("/add-subscriber",
     authenticateToken,
     requireSignin,
-    requireIsAdmin,
+    requireIsVolunteer,
     subscribersController.addSubscriber
 );
 
-router.delete("/delete-subscriber/:email",
+router.post("/delete-subscriber",
     authenticateToken,
     requireSignin,
-    requireIsAdmin,
+    requireIsVolunteer,
     subscribersController.deleteSubscriber
 );
 
-router.post("is-email-subscribed",
+router.post("/is-email-subscribed",
     authenticateToken,
     requireSignin,
-    requireIsAdmin,
+    requireIsVolunteer,
     subscribersController.isEmailSubscribed
 );
 

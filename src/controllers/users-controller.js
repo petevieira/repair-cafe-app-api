@@ -91,7 +91,6 @@ async function signIn(req, res) {
 const signedInUserIsAdmin = async (req, res) => {
     // Get user from auth
     const authUser = req.auth._id;
-
     if (!authUser) {
         return sendResponse(res, 'No auth user found in request', {}, StatusCodes.BAD_REQUEST);
     }

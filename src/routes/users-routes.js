@@ -16,7 +16,6 @@ router.post("/sign-in", usersController.signIn);
 router.post("/signed-in-user-is-admin",
     authenticateToken,
     requireSignin,
-    requireIsAdmin,
     usersController.signedInUserIsAdmin
 );
 
