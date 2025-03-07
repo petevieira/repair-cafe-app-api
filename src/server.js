@@ -29,11 +29,10 @@ database.connect();
 
 // Create server with secure https
 // https.createServer(sslOptions, app);
-
 // Start listening for requests
 const port = process.env.PORT || 3000;
 const server = app.listen(port, () => {
-  console.log('App is running in ' + process.env.NODE_ENV
+console.log('App is running in ' + process.env.NODE_ENV
     + ' mode and listening on port ' + port);
 });
 
