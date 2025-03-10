@@ -4,29 +4,45 @@ const Volunteer = require('../models/volunteer');
 const {
     sendResponse,
     validateRequest,
-    toLowerCapFirstLetter
+    toLowerCapFirstLetter,
+    extractErrorMessage,
 } = require('../helpers/rest-helpers');
 const mongoose = require('mongoose');
 
 async function addVolunteer(req, res) {
     // Check for required request params
     const result = validateRequest(req.body,
-        ['firstName', 'lastName', 'email', 'acceptsWaiver']
+        ['firstName', 'lastName', 'email', 'acceptsWaiver', 'eventId']
     );
+
     if (result !== true) {
         return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
     }
 
-    const { firstName, lastName, email, acceptsWaiver } = req.body;
+    const { firstName, lastName, email, acceptsWaiver, eventId } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(eventId)) {
+        return sendResponse(res, "Invalid eventId", {}, StatusCodes.BAD_REQUEST);
+    }
 
     try {
+        const existingVolunteer = await Volunteer.findOne(
+            { email: email, eventId: mongoose.Types.ObjectId(eventId) }
+        );
+        if (existingVolunteer) {
+            return sendResponse(
+                res,
+                `Volunteer already added`,
+                { volunteer: existingVolunteer },
+            );
+        }
         const volunteer = await new Volunteer({
-            firstName, lastName, email, acceptsWaiver
+            firstName, lastName, email, acceptsWaiver, eventId
         }).save();
-        return sendResponse(res, "Volunteer added", volunteer);
+        return sendResponse(res, "Volunteer added", { volunteer });
     } catch (err) {
         console.error(err);
-        return sendResponse(res, err, {}, StatusCodes.INTERNAL_SERVER_ERROR);
+        return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -53,6 +69,7 @@ async function getVolunteer(req, res) {
         );
     } catch (error) {
         console.error(error);
+        return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -66,11 +83,11 @@ async function deleteVolunteer(req, res) {
     try {
         const id = req.params.id;
         const volunteer = await Volunteer.deleteOne({ _id: id });
-        const msg = volunteer.deletedCount > 0 ? `Volunteer ${id} deleted` : "Volunteer not found";
-        return sendResponse(res, msg, volunteer);
-    } catch (err) {
-        console.error(err);
-        return sendResponse(res, err, {}, StatusCodes.INTERNAL_SERVER_ERROR);
+        const msg = volunteer.deletedCount > 0 ? `Volunteer deleted` : "Volunteer not found";
+        return sendResponse(res, msg, { volunteer });
+    } catch (error) {
+        console.error(error);
+        return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -102,10 +119,11 @@ async function updateVolunteer(req, res) {
         const updatedVolunteer = await Volunteer.findOne({ _id: id });
 
         return sendResponse(
-            res, `Volunteer (${id}) updated`, { volunteer: updatedVolunteer }
+            res, `Volunteer updated`, { volunteer: updatedVolunteer }
         );
     } catch (error) {
         console.error(error);
+        return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -142,9 +160,9 @@ async function getDaysVolunteers(req, res) {
             `Found ${volunteers.length} volunteer(s)`,
             { volunteers: volunteers }
         );
-    } catch (err) {
-        console.error(err);
-        return sendResponse(res, err, {}, StatusCodes.INTERNAL_SERVER_ERROR);
+    } catch (error) {
+        console.error(error);
+        return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -158,6 +176,8 @@ async function getVolunteersByEvent(req, res) {
     if (!mongoose.Types.ObjectId.isValid(eventId)) {
         return sendResponse(res, "Invalid eventId", {}, StatusCodes.BAD_REQUEST);
     }
+
+    console.debug(`Finding volunteers for event ${eventId}`);
 
     try {
         const volunteers = await Volunteer.aggregate([
@@ -174,13 +194,14 @@ async function getVolunteersByEvent(req, res) {
                 },
             }
         ]);
+        console.debug("Volunteers found: ", volunteers);
         return sendResponse(
             res,
             `Found ${volunteers.length} volunteer(s) for event ${req.params.eventId}`,
             { volunteers: volunteers }
         );
-    } catch (err) {
-        return sendResponse(res, err, {}, StatusCodes.INTERNAL_SERVER_ERROR);
+    } catch (error) {
+        return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -220,8 +241,8 @@ async function getPastVolunteers(req, res) {
             `Found ${volunteers.length} unique volunteer(s)`,
             { pastVolunteers: volunteers }
         );
-    } catch (err) {
-        return sendResponse(res, err, {}, StatusCodes.INTERNAL_SERVER_ERROR);
+    } catch (error) {
+        return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -233,13 +254,17 @@ async function findVolunteerByEmail(req, res) {
 
     try {
         const volunteer = await Volunteer.findOne({email: req.params.email});
+        if (!volunteer) {
+            return sendResponse(res, "Email not registered", { volunteer: null });
+        }
+
         return sendResponse(
             res,
             `Found volunteer with email ${req.params.email}`,
             { volunteer: volunteer }
         );
-    } catch (err) {
-        return sendResponse(res, err, {}, StatusCodes.INTERNAL_SERVER_ERROR);
+    } catch (error) {
+        return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 

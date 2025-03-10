@@ -60,17 +60,35 @@ function validateRequest(requestBody, requiredParams) {
   return objectHasRequiredProperties(requestBody, requiredParams, 'request');
 }
 
+/**
+ * Converts the first letter of a string to uppercase and the rest to lowercase
+ * @param {string} str - string to convert
+ * @returns {string} - string with first letter uppercase and the rest lowercase
+ */
 function toLowerCapFirstLetter(str) {
   let newStr = str.toLowerCase();
   return (newStr.charAt(0).toUpperCase() + newStr.slice(1));
 }
 
+/**
+ * Extracts the most meaningful error message from an error object
+ * @param {*} error - error object
+ * @returns {string} - error message
+ */
 function extractErrorMessage(error) {
+    if (!error) {
+        return "An unknown error occurred.";
+    }
+
     // Extract the most meaningful error message
-    return error.response?.data?.message || // API response error (Axios)
+    return (
+        error.response?.data?.message || // API response error (Axios)
         error.message || // Standard JavaScript errors
         error.msg || // Custom error object
-        "An unknown error occurred."; // Default fallback
+        (error.errors ? JSON.stringify(error.errors) : null) || // Mongoose validation error
+        (typeof error.toString === "function" ? error.toString() : null) || // Fallback
+        "An unknown error occurred." // Default fallback
+    );
 }
 
 module.exports = {

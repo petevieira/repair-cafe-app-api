@@ -93,6 +93,7 @@ async function addFullRepair(req, res) {
         return sendResponse(res, "Full repair created", { repair: repair }, StatusCodes.CREATED);
     } catch (error) {
         console.error(error);
+        return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -151,7 +152,7 @@ async function updateRepair(req, res) {
         repairerFirstName = toLowerCapFirstLetter(repairerFirstName);
         repairerLastName = toLowerCapFirstLetter(repairerLastName);
 
-        await Repair.findOneAndUpdate(
+        const updatedRepair = await Repair.findOneAndUpdate(
             { _id: _id },
             {
                 acceptsWaiver,
@@ -172,12 +173,16 @@ async function updateRepair(req, res) {
                 type,
                 symptoms,
                 weight,
-            }
+            },
+            { new: true }
         );
-        const updatedRepair = await Repair.findById(_id);
-        return sendResponse(res, `Repair (${_id}) updated`, { repair: updatedRepair});
+        if (!updatedRepair) {
+            return sendResponse(res, "Repair not found", {}, StatusCodes.BAD_REQUEST);
+        }
+        return sendResponse(res, `Repair updated`, { repair: updatedRepair});
     } catch (error) {
         console.error(error);
+        return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -202,6 +207,7 @@ async function getRepair(req, res) {
         return sendResponse(res, `Repair with id ${id} found`, { repair: repair });
     } catch (error) {
         console.error(error);
+        return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -260,6 +266,7 @@ async function getRepairsBasic(req, res) {
         return sendResponse(res, `Found ${repairs.length} repairs(s)`, { repairs });
     } catch (error) {
         console.error(error);
+        return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -275,19 +282,33 @@ async function findIncompleteRepairsByOwner(req, res) {
     const email = req.params.email;
 
     try {
-        const repairs = await Repair.find({
-            ownersEmail: email,
-            repairStatus: { $nin: ["Fixed", "End of Life"] }
-        });
+        const repairs = await Repair
+            .find({
+                ownersEmail: email,
+                repairStatus: { $nin: ["Fixed", "End of Life"] }
+            })
+            .sort({ createdAt: 1 });
+
         if (repairs.length === 0) {
             return sendResponse(
                 res,
                 `No incomplete repairs found with owner's email ${email}`,
-                {},
-                StatusCodes.BAD_REQUEST
+                { repairs: null },
             );
         }
-        return sendResponse(res, `Found ${repairs.length} incomplete repair(s)`, { repairs: repairs });
+        if (repairs.length === 1) {
+            return sendResponse(
+                res,
+                `Found 1 incomplete repair`,
+                { repairs: repairs }
+            );
+        } else {
+            return sendResponse(
+                res,
+                `Found ${repairs.length} incomplete repairs`,
+                { repairs: repairs }
+            );
+        }
     } catch (error) {
         console.error(error);
         return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
@@ -312,7 +333,7 @@ async function deleteRepair(req, res) {
         return sendResponse(res, msg, repair);
     } catch (err) {
         console.error(err);
-        return sendResponse(res, err, {}, StatusCodes.INTERNAL_SERVER_ERROR);
+        return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 
@@ -353,6 +374,7 @@ async function findOwnerByEmail(req, res) {
         );
     } catch (error) {
         console.error(error);
+        return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
     }
 }
 

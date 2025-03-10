@@ -27,7 +27,12 @@ const volunteerSchema = new Schema(
     acceptsWaiver: {
       type: Boolean,
       required: true,
-    }
+    },
+    eventId: {
+      type: Schema.Types.ObjectId,
+      ref: "RepairEvent",
+      required: true,
+    },
   },
   {
     timestamps: true

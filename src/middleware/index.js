@@ -16,8 +16,11 @@ const requireIsAdmin = async (req, res, next) => {
   try {
     // you get req.user._id from verified jwt token
     const user = await User.findById(req.auth._id);
+    if (!user?.role) {
+        return sendResponse(res, 'Unauthorized. Must be signed in.', {}, StatusCodes.UNAUTHORIZED);
+    }
     if (user.role !== "admin") {
-      return sendResponse(res, 'Unauthorized', {}, StatusCodes.UNAUTHORIZED);
+      return sendResponse(res, 'Unauthorized. Must be an admin.', {}, StatusCodes.FORBIDDEN);
     } else {
       // user is an admin
       next();
@@ -32,10 +35,12 @@ const requireIsVolunteer = async (req, res, next) => {
       // you get req.user._id from verified jwt token
       const user = await User.findById(req.auth._id);
       if (!user?.role) {
-        return sendResponse(res, 'Unauthorized', {}, StatusCodes.UNAUTHORIZED);
+        return sendResponse(res, 'Unauthorized. Must be signed in.', {}, StatusCodes.UNAUTHORIZED);
       }
       if (user.role !== "volunteer" && user.role !== "admin") {
-        return sendResponse(res, 'Unauthorized', {}, StatusCodes.UNAUTHORIZED);
+        return sendResponse(
+            res, 'Unauthorized. Must be a volunteer or admin.', {}, StatusCodes.FORBIDDEN
+        );
       } else {
         // user is an volunteer
         next();
