@@ -24,30 +24,31 @@ const sslOptions = {
   //   cert: cert
 };
 
-// Connect to database
-try {
-  await database.connect();
-} catch (error) {
-  console.error(error);
-  process.exit(1);
-}
+(async () => {
+  try {
+    await database.connect();
 
-// Create server with secure https
-// https.createServer(sslOptions, app);
-// Start listening for requests
-const port = process.env.PORT || 3000;
-const server = app.listen(port, () => {
-  console.log("App is running in " + process.env.NODE_ENV + " mode and listening on port " + port);
-});
+    // Create server with secure https
+    // https.createServer(sslOptions, app);
+    // Start listening for requests
+    const port = process.env.PORT || 3000;
+    const server = app.listen(port, () => {
+      console.log("App is running in " + process.env.NODE_ENV + " mode and listening on port " + port);
+    });
 
-function handleSignal(signal) {
-  console.info(`Received ${signal}`);
-  console.log("Closing server...");
-  server.close(async () => {
-    console.log("Server closed");
-  });
-}
+    function handleSignal(signal) {
+      console.info(`Received ${signal}`);
+      console.log("Closing server...");
+      server.close(async () => {
+        console.log("Server closed");
+      });
+    }
 
-// Handle Interrupt and Terminate signals on command-line
-process.on("SIGINT", handleSignal);
-process.on("SIGTERM", handleSignal);
+    // Handle Interrupt and Terminate signals on command-line
+    process.on("SIGINT", handleSignal);
+    process.on("SIGTERM", handleSignal);
+  } catch (err) {
+    console.error(err);
+    process.exit(1);
+  }
+})();
