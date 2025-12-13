@@ -46,7 +46,7 @@ async function connect() {
     console.log("MongoDB connection established");
   } catch (err) {
     console.error(err);
-    process.exit(1);
+    throw err;
   }
 }
 
@@ -56,6 +56,7 @@ async function close() {
     console.log("MongoDB connection closed");
   } catch (err) {
     console.error(err);
+    throw err;
   }
 }
 

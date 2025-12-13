@@ -4,13 +4,13 @@
  * @description loads the app and starts listening to requests.
  */
 
-const process = require('process'); // for uncaught exceptions
+const process = require("process"); // for uncaught exceptions
 
-const app = require('./app'); // get our ExpressJS app
-const database = require('./database/database-config'); // database connection
+const app = require("./app"); // get our ExpressJS app
+const database = require("./database/database-config"); // database connection
 
 // Catch uncaught exceptions and exit app
-process.on("uncaughtException", err => {
+process.on("uncaughtException", (err) => {
   console.error("UNCAUGHT EXCEPTION!!! shutting down...");
   console.error(err.name, err.message);
   process.exit(1);
@@ -20,30 +20,34 @@ process.on("uncaughtException", err => {
 // var key = fs.readFileSync(__dirname + "/../ssl-certs/selfsigned.key");
 // var cert = fs.readFileSync(__dirname + "/../ssl-certs/selfsigned.crt");
 const sslOptions = {
-//   key: key,
-//   cert: cert
+  //   key: key,
+  //   cert: cert
 };
 
 // Connect to database
-database.connect();
+try {
+  await database.connect();
+} catch (error) {
+  console.error(error);
+  process.exit(1);
+}
 
 // Create server with secure https
 // https.createServer(sslOptions, app);
 // Start listening for requests
 const port = process.env.PORT || 3000;
 const server = app.listen(port, () => {
-console.log('App is running in ' + process.env.NODE_ENV
-    + ' mode and listening on port ' + port);
+  console.log("App is running in " + process.env.NODE_ENV + " mode and listening on port " + port);
 });
 
 function handleSignal(signal) {
   console.info(`Received ${signal}`);
-  console.log('Closing server...');
+  console.log("Closing server...");
   server.close(async () => {
-    console.log('Server closed');
+    console.log("Server closed");
   });
 }
 
 // Handle Interrupt and Terminate signals on command-line
-process.on('SIGINT', handleSignal);
-process.on('SIGTERM', handleSignal);
+process.on("SIGINT", handleSignal);
+process.on("SIGTERM", handleSignal);
