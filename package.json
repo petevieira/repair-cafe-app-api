@@ -4,14 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start:dev": "NODE_ENV=development nodemon -r esm ./src/server.js",
-    "start:staging": "NODE_ENV=staging nodemon -r esm ./src/server.js",
+    "start:dev": "NODE_ENV=development nodemon ./src/server.js",
+    "start:staging": "NODE_ENV=staging nodemon ./src/server.js",
     "start:prod": "NODE_ENV=production ./node_modules/pm2/bin/pm2-runtime start ./src/server.js",
     "test": "NODE_ENV=test && jest --detectOpenHandles --testTimeout=10000 --coverage",
     "jsdoc": "jsdoc -c jsdoc-config.json"
   },
   "engines": {
-    "node": "20.11.1"
+    "node": "22.14.0"
   },
   "keywords": [],
   "author": "",
