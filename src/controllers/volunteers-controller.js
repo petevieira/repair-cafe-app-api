@@ -191,6 +191,7 @@ async function getVolunteersByEvent(req, res) {
                     _id: 1,
                     firstName: 1,
                     lastName: 1,
+                    email: 1,
                 },
             }
         ]);
@@ -209,30 +210,50 @@ async function getPastVolunteers(req, res) {
     try {
         const volunteers = await Volunteer.aggregate(
             [
-                // Exclude documents with missing email
                 {
                     $match: {
                         email: {
                             $exists: true,
-                            $ne: null
-                        }
-                    }
+                            $nin: [null, ""],
+                        },
+                    },
                 },
-                // Find distinct volunteers based on first and last name
+                {
+                    $addFields: {
+                        normalizedEmail: {
+                            $toLower: { $trim: { input: "$email" } },
+                        },
+                    },
+                },
+                {
+                    $match: {
+                        normalizedEmail: { $ne: "" },
+                    },
+                },
+                {
+                    $sort: { updatedAt: -1 },
+                },
                 {
                     $group: {
-                        _id: "$email",
-                        "doc": { "$first": "$$ROOT"}
-                    }
+                        _id: "$normalizedEmail",
+                        doc: { $first: "$$ROOT" },
+                    },
                 },
                 {
                     $replaceRoot: {
-                        "newRoot": "$doc"
-                    }
+                        newRoot: "$doc",
+                    },
                 },
-                // Sort by updatedAt date in descending order
                 {
-                    $sort: { updatedAt: -1 }
+                    $project: {
+                        normalizedEmail: 0,
+                    },
+                },
+                {
+                    $sort: {
+                        lastName: 1,
+                        firstName: 1,
+                    },
                 },
             ]
         );
