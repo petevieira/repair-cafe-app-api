@@ -1,320 +1,289 @@
-
-const { StatusCodes } = require('http-status-codes');
-const Volunteer = require('../models/volunteer');
+const { StatusCodes } = require("http-status-codes");
+const Volunteer = require("../models/volunteer");
 const {
-    sendResponse,
-    validateRequest,
-    toLowerCapFirstLetter,
-    extractErrorMessage,
-} = require('../helpers/rest-helpers');
-const mongoose = require('mongoose');
+  sendResponse,
+  validateRequest,
+  toLowerCapFirstLetter,
+  extractErrorMessage,
+} = require("../helpers/rest-helpers");
+const mongoose = require("mongoose");
 
 async function addVolunteer(req, res) {
-    // Check for required request params
-    const result = validateRequest(req.body,
-        ['firstName', 'lastName', 'email', 'acceptsWaiver', 'eventId']
-    );
+  // Check for required request params
+  const result = validateRequest(req.body, ["firstName", "lastName", "email", "acceptsWaiver", "eventId"]);
 
-    if (result !== true) {
-        return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
+  if (result !== true) {
+    return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
+  }
+
+  const { firstName, lastName, email, acceptsWaiver, eventId } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(eventId)) {
+    return sendResponse(res, "Invalid eventId", {}, StatusCodes.BAD_REQUEST);
+  }
+
+  try {
+    const existingVolunteer = await Volunteer.findOne({ email: email, eventId: mongoose.Types.ObjectId(eventId) });
+    if (existingVolunteer) {
+      return sendResponse(res, `Volunteer already added`, { volunteer: existingVolunteer });
     }
-
-    const { firstName, lastName, email, acceptsWaiver, eventId } = req.body;
-
-    if (!mongoose.Types.ObjectId.isValid(eventId)) {
-        return sendResponse(res, "Invalid eventId", {}, StatusCodes.BAD_REQUEST);
-    }
-
-    try {
-        const existingVolunteer = await Volunteer.findOne(
-            { email: email, eventId: mongoose.Types.ObjectId(eventId) }
-        );
-        if (existingVolunteer) {
-            return sendResponse(
-                res,
-                `Volunteer already added`,
-                { volunteer: existingVolunteer },
-            );
-        }
-        const volunteer = await new Volunteer({
-            firstName, lastName, email, acceptsWaiver, eventId
-        }).save();
-        return sendResponse(res, "Volunteer added", { volunteer });
-    } catch (err) {
-        console.error(err);
-        return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
-    }
+    const volunteer = await new Volunteer({
+      firstName,
+      lastName,
+      email,
+      acceptsWaiver,
+      eventId,
+    }).save();
+    return sendResponse(res, "Volunteer added", { volunteer });
+  } catch (err) {
+    console.error(err);
+    return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
+  }
 }
 
 async function getVolunteer(req, res) {
-    const result = validateRequest(req.params, ['id']);
-    if (result !== true) {
-        return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
-    }
-    if (req.params.id.trim() === "") {
-        return sendResponse(res, "id empty", {}, StatusCodes.BAD_REQUEST);
-    }
+  const result = validateRequest(req.params, ["id"]);
+  if (result !== true) {
+    return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
+  }
+  if (req.params.id.trim() === "") {
+    return sendResponse(res, "id empty", {}, StatusCodes.BAD_REQUEST);
+  }
 
-    const id = req.params.id;
+  const id = req.params.id;
 
-    try {
-        const volunteer = await Volunteer.findById(id);
-        if (!volunteer) {
-            return sendResponse(
-                res, `No volunteer found with id ${id}`, {}, StatusCodes.BAD_REQUEST
-            );
-        }
-        return sendResponse(
-            res, `Volunteer with id ${id} found`, { volunteer: volunteer }
-        );
-    } catch (error) {
-        console.error(error);
-        return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
+  try {
+    const volunteer = await Volunteer.findById(id);
+    if (!volunteer) {
+      return sendResponse(res, `No volunteer found with id ${id}`, {}, StatusCodes.BAD_REQUEST);
     }
+    return sendResponse(res, `Volunteer with id ${id} found`, { volunteer: volunteer });
+  } catch (error) {
+    console.error(error);
+    return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
+  }
 }
 
 async function deleteVolunteer(req, res) {
-    // Check for required request params
-    const result = validateRequest(req.params, ['id']);
-    if (result !== true) {
-        return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
-    }
+  // Check for required request params
+  const result = validateRequest(req.params, ["id"]);
+  if (result !== true) {
+    return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
+  }
 
-    try {
-        const id = req.params.id;
-        const volunteer = await Volunteer.deleteOne({ _id: id });
-        const msg = volunteer.deletedCount > 0 ? `Volunteer deleted` : "Volunteer not found";
-        return sendResponse(res, msg, { volunteer });
-    } catch (error) {
-        console.error(error);
-        return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
-    }
+  try {
+    const id = req.params.id;
+    const volunteer = await Volunteer.deleteOne({ _id: id });
+    const msg = volunteer.deletedCount > 0 ? `Volunteer deleted` : "Volunteer not found";
+    return sendResponse(res, msg, { volunteer });
+  } catch (error) {
+    console.error(error);
+    return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
+  }
 }
 
 async function updateVolunteer(req, res) {
-    const result = validateRequest(req.body, [
-        'id', 'firstName', 'lastName'
-    ]);
-    if (result !== true) {
-        return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
-    }
-    if (req.body.id === '') {
-        return sendResponse(res, "id is empty", {}, StatusCodes.BAD_REQUEST);
-    }
+  const result = validateRequest(req.body, ["id", "firstName", "lastName"]);
+  if (result !== true) {
+    return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
+  }
+  if (req.body.id === "") {
+    return sendResponse(res, "id is empty", {}, StatusCodes.BAD_REQUEST);
+  }
 
-    try {
-        let { id, firstName, lastName, email, acceptsWaiver } = req.body;
-        firstName = toLowerCapFirstLetter(firstName);
-        lastName = toLowerCapFirstLetter(lastName);
+  try {
+    let { id, firstName, lastName, email, acceptsWaiver } = req.body;
+    firstName = toLowerCapFirstLetter(firstName);
+    lastName = toLowerCapFirstLetter(lastName);
 
-        const originalVolunteer = await Volunteer.findOneAndUpdate(
-            { _id: id },
-            {
-                firstName,
-                lastName,
-                email,
-                acceptsWaiver
-            }
-        );
-        const updatedVolunteer = await Volunteer.findOne({ _id: id });
+    const originalVolunteer = await Volunteer.findOneAndUpdate(
+      { _id: id },
+      {
+        firstName,
+        lastName,
+        email,
+        acceptsWaiver,
+      },
+    );
+    const updatedVolunteer = await Volunteer.findOne({ _id: id });
 
-        return sendResponse(
-            res, `Volunteer updated`, { volunteer: updatedVolunteer }
-        );
-    } catch (error) {
-        console.error(error);
-        return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
-    }
+    return sendResponse(res, `Volunteer updated`, { volunteer: updatedVolunteer });
+  } catch (error) {
+    console.error(error);
+    return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
+  }
 }
 
 async function getDaysVolunteers(req, res) {
-    // Check for required request params
-    const result = validateRequest(req.params, ['date']);
-    if (result !== true) {
-        return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
-    }
-    const date = new Date(req.params.date);
-    let datePlus24h = new Date(req.params.date);
-    datePlus24h.setDate(date.getDate() + 1);
+  // Check for required request params
+  const result = validateRequest(req.params, ["date"]);
+  if (result !== true) {
+    return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
+  }
+  const date = new Date(req.params.date);
+  let datePlus24h = new Date(req.params.date);
+  datePlus24h.setDate(date.getDate() + 1);
 
-    try {
-        const volunteers = await Volunteer.aggregate([
-            {
-                $match: {
-                    createdAt: {
-                        $gte: date,
-                        $lt: datePlus24h
-                    }
-                },
-            },
-            {
-                $project: {
-                    _id: 1,
-                    firstName: 1,
-                    lastName: 1
-                }
-            }
-        ]);
-        return sendResponse(
-            res,
-            `Found ${volunteers.length} volunteer(s)`,
-            { volunteers: volunteers }
-        );
-    } catch (error) {
-        console.error(error);
-        return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
-    }
+  try {
+    const volunteers = await Volunteer.aggregate([
+      {
+        $match: {
+          createdAt: {
+            $gte: date,
+            $lt: datePlus24h,
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          firstName: 1,
+          lastName: 1,
+        },
+      },
+    ]);
+    return sendResponse(res, `Found ${volunteers.length} volunteer(s)`, { volunteers: volunteers });
+  } catch (error) {
+    console.error(error);
+    return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
+  }
 }
 
 async function getVolunteersByEvent(req, res) {
-    const result = validateRequest(req.params, ['eventId']);
-    if (result !== true) {
-        return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
-    }
+  const result = validateRequest(req.params, ["eventId"]);
+  if (result !== true) {
+    return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
+  }
 
-    const eventId = req.params.eventId;
-    if (!mongoose.Types.ObjectId.isValid(eventId)) {
-        return sendResponse(res, "Invalid eventId", {}, StatusCodes.BAD_REQUEST);
-    }
+  const eventId = req.params.eventId;
+  if (!mongoose.Types.ObjectId.isValid(eventId)) {
+    return sendResponse(res, "Invalid eventId", {}, StatusCodes.BAD_REQUEST);
+  }
 
-    console.debug(`Finding volunteers for event ${eventId}`);
+  console.debug(`Finding volunteers for event ${eventId}`);
 
-    try {
-        const volunteers = await Volunteer.aggregate([
-            {
-                $match: {
-                    eventId: mongoose.Types.ObjectId(eventId)
-                }
-            },
-            {
-                $project: {
-                    _id: 1,
-                    firstName: 1,
-                    lastName: 1,
-                    email: 1,
-                },
-            }
-        ]);
-        console.debug("Volunteers found: ", volunteers);
-        return sendResponse(
-            res,
-            `Found ${volunteers.length} volunteer(s) for event ${req.params.eventId}`,
-            { volunteers: volunteers }
-        );
-    } catch (error) {
-        return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
-    }
-}
-
-function volunteerNameKey(firstName, lastName) {
-    const normalizedFirst = String(firstName ?? "")
-        .trim()
-        .replace(/\s+/g, " ")
-        .toLowerCase();
-    const normalizedLast = String(lastName ?? "")
-        .trim()
-        .replace(/\s+/g, " ")
-        .toLowerCase();
-
-    if (!normalizedFirst || !normalizedLast) {
-        return null;
-    }
-
-    return `${normalizedFirst}|${normalizedLast}`;
-}
-
-function capitalizeVolunteerName(name) {
-    const trimmed = String(name ?? "").trim().replace(/\s+/g, " ");
-    if (!trimmed) {
-        return trimmed;
-    }
-    return toLowerCapFirstLetter(trimmed);
+  try {
+    const volunteers = await Volunteer.aggregate([
+      {
+        $match: {
+          eventId: mongoose.Types.ObjectId(eventId),
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          firstName: 1,
+          lastName: 1,
+          email: 1,
+        },
+      },
+    ]);
+    console.debug("Volunteers found: ", volunteers);
+    return sendResponse(res, `Found ${volunteers.length} volunteer(s) for event ${req.params.eventId}`, {
+      volunteers: volunteers,
+    });
+  } catch (error) {
+    return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
+  }
 }
 
 async function getPastVolunteers(req, res) {
-    try {
-        const volunteers = await Volunteer.find({})
-            .sort({ updatedAt: -1 })
-            .lean();
+  try {
+    const volunteers = await Volunteer.aggregate([
+      {
+        $match: {
+          firstName: { $exists: true, $nin: [null, ""] },
+          lastName: { $exists: true, $nin: [null, ""] },
+        },
+      },
+      {
+        $addFields: {
+          sortFirstName: {
+            $toLower: { $trim: { input: { $toString: "$firstName" } } },
+          },
+          sortLastName: {
+            $toLower: { $trim: { input: { $toString: "$lastName" } } },
+          },
+        },
+      },
+      {
+        $match: {
+          sortFirstName: { $ne: "" },
+          sortLastName: { $ne: "" },
+        },
+      },
+      { $sort: { updatedAt: -1 } },
+      {
+        $group: {
+          _id: { firstName: "$sortFirstName", lastName: "$sortLastName" },
+          firstName: { $first: "$firstName" },
+          lastName: { $first: "$lastName" },
+          email: { $first: "$email" },
+          acceptsWaiver: { $first: "$acceptsWaiver" },
+          updatedAt: { $first: "$updatedAt" },
+          createdAt: { $first: "$createdAt" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          firstName: 1,
+          lastName: 1,
+          email: 1,
+          acceptsWaiver: 1,
+          updatedAt: 1,
+          createdAt: 1,
+          sortFirstName: "$_id.firstName",
+          sortLastName: "$_id.lastName",
+        },
+      },
+      { $sort: { sortFirstName: 1, sortLastName: 1 } },
+    ]);
 
-        const volunteerByName = new Map();
+    const pastVolunteers = volunteers.map((volunteer) => ({
+      firstName: toLowerCapFirstLetter(String(volunteer.firstName).trim()),
+      lastName: toLowerCapFirstLetter(String(volunteer.lastName).trim()),
+      email: volunteer.email ? String(volunteer.email).trim() : volunteer.email,
+      acceptsWaiver: volunteer.acceptsWaiver,
+      updatedAt: volunteer.updatedAt,
+      createdAt: volunteer.createdAt,
+    }));
 
-        for (const volunteer of volunteers) {
-            const nameKey = volunteerNameKey(volunteer.firstName, volunteer.lastName);
-            if (!nameKey || volunteerByName.has(nameKey)) {
-                continue;
-            }
-            volunteerByName.set(nameKey, volunteer);
-        }
-
-        const pastVolunteers = Array.from(volunteerByName.values())
-            .map((volunteer) => {
-                const sortFirstName = String(volunteer.firstName ?? "")
-                    .trim()
-                    .replace(/\s+/g, " ")
-                    .toLowerCase();
-                const sortLastName = String(volunteer.lastName ?? "")
-                    .trim()
-                    .replace(/\s+/g, " ")
-                    .toLowerCase();
-
-                return {
-                    ...volunteer,
-                    email: volunteer.email ? String(volunteer.email).trim() : volunteer.email,
-                    firstName: capitalizeVolunteerName(volunteer.firstName),
-                    lastName: capitalizeVolunteerName(volunteer.lastName),
-                    sortFirstName,
-                    sortLastName,
-                };
-            })
-            .sort((a, b) => {
-                const byFirstName = a.sortFirstName.localeCompare(b.sortFirstName, "en", { sensitivity: "base" });
-                if (byFirstName !== 0) {
-                    return byFirstName;
-                }
-                return a.sortLastName.localeCompare(b.sortLastName, "en", { sensitivity: "base" });
-            })
-            .map(({ sortFirstName, sortLastName, ...volunteer }) => volunteer);
-
-        return sendResponse(
-            res,
-            `Found ${pastVolunteers.length} unique volunteer(s)`,
-            { pastVolunteers }
-        );
-    } catch (error) {
-        return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
-    }
+    return sendResponse(
+      res,
+      `Found ${pastVolunteers.length} unique volunteer(s)`,
+      { pastVolunteers }
+    );
+  } catch (error) {
+    return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
+  }
 }
 
 async function findVolunteerByEmail(req, res) {
-    const result = validateRequest(req.params, ['email']);
-    if (result !== true) {
-        return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
+  const result = validateRequest(req.params, ["email"]);
+  if (result !== true) {
+    return sendResponse(res, result, {}, StatusCodes.BAD_REQUEST);
+  }
+
+  try {
+    const volunteer = await Volunteer.findOne({ email: req.params.email });
+    if (!volunteer) {
+      return sendResponse(res, "Email not registered", { volunteer: null });
     }
 
-    try {
-        const volunteer = await Volunteer.findOne({email: req.params.email});
-        if (!volunteer) {
-            return sendResponse(res, "Email not registered", { volunteer: null });
-        }
-
-        return sendResponse(
-            res,
-            `Found volunteer with email ${req.params.email}`,
-            { volunteer: volunteer }
-        );
-    } catch (error) {
-        return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
-    }
+    return sendResponse(res, `Found volunteer with email ${req.params.email}`, { volunteer: volunteer });
+  } catch (error) {
+    return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
+  }
 }
 
 module.exports = {
-    addVolunteer,
-    updateVolunteer,
-    deleteVolunteer,
-    getDaysVolunteers,
-    getVolunteer,
-    getPastVolunteers,
-    findVolunteerByEmail,
-    getVolunteersByEvent,
+  addVolunteer,
+  updateVolunteer,
+  deleteVolunteer,
+  getDaysVolunteers,
+  getVolunteer,
+  getPastVolunteers,
+  findVolunteerByEmail,
+  getVolunteersByEvent,
 };
