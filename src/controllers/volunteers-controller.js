@@ -216,6 +216,14 @@ async function getPastVolunteers(req, res) {
                             $exists: true,
                             $nin: [null, ""],
                         },
+                        firstName: {
+                            $exists: true,
+                            $nin: [null, ""],
+                        },
+                        lastName: {
+                            $exists: true,
+                            $nin: [null, ""],
+                        },
                     },
                 },
                 {
@@ -223,11 +231,19 @@ async function getPastVolunteers(req, res) {
                         normalizedEmail: {
                             $toLower: { $trim: { input: "$email" } },
                         },
+                        normalizedFirstName: {
+                            $toLower: { $trim: { input: "$firstName" } },
+                        },
+                        normalizedLastName: {
+                            $toLower: { $trim: { input: "$lastName" } },
+                        },
                     },
                 },
                 {
                     $match: {
                         normalizedEmail: { $ne: "" },
+                        normalizedFirstName: { $ne: "" },
+                        normalizedLastName: { $ne: "" },
                     },
                 },
                 {
@@ -235,7 +251,10 @@ async function getPastVolunteers(req, res) {
                 },
                 {
                     $group: {
-                        _id: "$normalizedEmail",
+                        _id: {
+                            firstName: "$normalizedFirstName",
+                            lastName: "$normalizedLastName",
+                        },
                         doc: { $first: "$$ROOT" },
                     },
                 },
@@ -247,20 +266,31 @@ async function getPastVolunteers(req, res) {
                 {
                     $project: {
                         normalizedEmail: 0,
-                    },
-                },
-                {
-                    $sort: {
-                        lastName: 1,
-                        firstName: 1,
+                        normalizedFirstName: 0,
+                        normalizedLastName: 0,
                     },
                 },
             ]
         );
+
+        const pastVolunteers = volunteers
+            .map((volunteer) => ({
+                ...volunteer,
+                firstName: toLowerCapFirstLetter(volunteer.firstName),
+                lastName: toLowerCapFirstLetter(volunteer.lastName),
+            }))
+            .sort((a, b) => {
+                const byFirstName = a.firstName.localeCompare(b.firstName, undefined, { sensitivity: "base" });
+                if (byFirstName !== 0) {
+                    return byFirstName;
+                }
+                return a.lastName.localeCompare(b.lastName, undefined, { sensitivity: "base" });
+            });
+
         return sendResponse(
             res,
-            `Found ${volunteers.length} unique volunteer(s)`,
-            { pastVolunteers: volunteers }
+            `Found ${pastVolunteers.length} unique volunteer(s)`,
+            { pastVolunteers }
         );
     } catch (error) {
         return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
