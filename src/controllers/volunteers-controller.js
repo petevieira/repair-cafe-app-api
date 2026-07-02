@@ -252,7 +252,10 @@ async function getPastVolunteers(req, res) {
     return sendResponse(
       res,
       `Found ${pastVolunteers.length} unique volunteer(s)`,
-      { pastVolunteers }
+      {
+        pastVolunteers,
+        meta: { sortBy: "firstName", version: 2 },
+      }
     );
   } catch (error) {
     return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
