@@ -206,43 +206,29 @@ async function getVolunteersByEvent(req, res) {
     }
 }
 
-function normalizeVolunteerNamePart(name) {
-    return (name ?? "")
+function volunteerNameKey(firstName, lastName) {
+    const normalizedFirst = String(firstName ?? "")
         .trim()
         .replace(/\s+/g, " ")
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "");
+        .toLowerCase();
+    const normalizedLast = String(lastName ?? "")
+        .trim()
+        .replace(/\s+/g, " ")
+        .toLowerCase();
+
+    if (!normalizedFirst || !normalizedLast) {
+        return null;
+    }
+
+    return `${normalizedFirst}|${normalizedLast}`;
 }
 
 function capitalizeVolunteerName(name) {
-    const trimmed = (name ?? "").trim().replace(/\s+/g, " ");
+    const trimmed = String(name ?? "").trim().replace(/\s+/g, " ");
     if (!trimmed) {
         return trimmed;
     }
     return toLowerCapFirstLetter(trimmed);
-}
-
-function compareVolunteerNames(a, b) {
-    const aFirst = normalizeVolunteerNamePart(a.firstName);
-    const bFirst = normalizeVolunteerNamePart(b.firstName);
-    if (aFirst < bFirst) {
-        return -1;
-    }
-    if (aFirst > bFirst) {
-        return 1;
-    }
-
-    const aLast = normalizeVolunteerNamePart(a.lastName);
-    const bLast = normalizeVolunteerNamePart(b.lastName);
-    if (aLast < bLast) {
-        return -1;
-    }
-    if (aLast > bLast) {
-        return 1;
-    }
-
-    return 0;
 }
 
 async function getPastVolunteers(req, res) {
@@ -254,27 +240,41 @@ async function getPastVolunteers(req, res) {
         const volunteerByName = new Map();
 
         for (const volunteer of volunteers) {
-            const firstName = (volunteer.firstName ?? "").trim().replace(/\s+/g, " ");
-            const lastName = (volunteer.lastName ?? "").trim().replace(/\s+/g, " ");
-
-            if (!firstName || !lastName) {
+            const nameKey = volunteerNameKey(volunteer.firstName, volunteer.lastName);
+            if (!nameKey || volunteerByName.has(nameKey)) {
                 continue;
             }
-
-            const nameKey = `${normalizeVolunteerNamePart(firstName)}|${normalizeVolunteerNamePart(lastName)}`;
-            if (!volunteerByName.has(nameKey)) {
-                volunteerByName.set(nameKey, volunteer);
-            }
+            volunteerByName.set(nameKey, volunteer);
         }
 
         const pastVolunteers = Array.from(volunteerByName.values())
-            .map((volunteer) => ({
-                ...volunteer,
-                email: volunteer.email ? volunteer.email.trim() : volunteer.email,
-                firstName: capitalizeVolunteerName(volunteer.firstName),
-                lastName: capitalizeVolunteerName(volunteer.lastName),
-            }))
-            .sort(compareVolunteerNames);
+            .map((volunteer) => {
+                const sortFirstName = String(volunteer.firstName ?? "")
+                    .trim()
+                    .replace(/\s+/g, " ")
+                    .toLowerCase();
+                const sortLastName = String(volunteer.lastName ?? "")
+                    .trim()
+                    .replace(/\s+/g, " ")
+                    .toLowerCase();
+
+                return {
+                    ...volunteer,
+                    email: volunteer.email ? String(volunteer.email).trim() : volunteer.email,
+                    firstName: capitalizeVolunteerName(volunteer.firstName),
+                    lastName: capitalizeVolunteerName(volunteer.lastName),
+                    sortFirstName,
+                    sortLastName,
+                };
+            })
+            .sort((a, b) => {
+                const byFirstName = a.sortFirstName.localeCompare(b.sortFirstName, "en", { sensitivity: "base" });
+                if (byFirstName !== 0) {
+                    return byFirstName;
+                }
+                return a.sortLastName.localeCompare(b.sortLastName, "en", { sensitivity: "base" });
+            })
+            .map(({ sortFirstName, sortLastName, ...volunteer }) => volunteer);
 
         return sendResponse(
             res,
