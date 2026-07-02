@@ -206,52 +206,75 @@ async function getVolunteersByEvent(req, res) {
     }
 }
 
+function normalizeVolunteerNamePart(name) {
+    return (name ?? "")
+        .trim()
+        .replace(/\s+/g, " ")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+}
+
+function capitalizeVolunteerName(name) {
+    const trimmed = (name ?? "").trim().replace(/\s+/g, " ");
+    if (!trimmed) {
+        return trimmed;
+    }
+    return toLowerCapFirstLetter(trimmed);
+}
+
+function compareVolunteerNames(a, b) {
+    const aFirst = normalizeVolunteerNamePart(a.firstName);
+    const bFirst = normalizeVolunteerNamePart(b.firstName);
+    if (aFirst < bFirst) {
+        return -1;
+    }
+    if (aFirst > bFirst) {
+        return 1;
+    }
+
+    const aLast = normalizeVolunteerNamePart(a.lastName);
+    const bLast = normalizeVolunteerNamePart(b.lastName);
+    if (aLast < bLast) {
+        return -1;
+    }
+    if (aLast > bLast) {
+        return 1;
+    }
+
+    return 0;
+}
+
 async function getPastVolunteers(req, res) {
     try {
         const volunteers = await Volunteer.find({})
             .sort({ updatedAt: -1 })
             .lean();
 
-        const seenNameKeys = new Set();
-        const pastVolunteers = [];
+        const volunteerByName = new Map();
 
         for (const volunteer of volunteers) {
-            const firstName = (volunteer.firstName ?? "").trim();
-            const lastName = (volunteer.lastName ?? "").trim();
+            const firstName = (volunteer.firstName ?? "").trim().replace(/\s+/g, " ");
+            const lastName = (volunteer.lastName ?? "").trim().replace(/\s+/g, " ");
 
             if (!firstName || !lastName) {
                 continue;
             }
 
-            const nameKey = `${firstName.toLowerCase()}|${lastName.toLowerCase()}`;
-            if (seenNameKeys.has(nameKey)) {
-                continue;
+            const nameKey = `${normalizeVolunteerNamePart(firstName)}|${normalizeVolunteerNamePart(lastName)}`;
+            if (!volunteerByName.has(nameKey)) {
+                volunteerByName.set(nameKey, volunteer);
             }
-            seenNameKeys.add(nameKey);
-
-            pastVolunteers.push({
-                ...volunteer,
-                email: volunteer.email ? volunteer.email.trim() : volunteer.email,
-                firstName: toLowerCapFirstLetter(firstName),
-                lastName: toLowerCapFirstLetter(lastName),
-            });
         }
 
-        pastVolunteers.sort((a, b) => {
-            const byFirstName = a.firstName.toLowerCase().localeCompare(
-                b.firstName.toLowerCase(),
-                "en",
-                { sensitivity: "base" },
-            );
-            if (byFirstName !== 0) {
-                return byFirstName;
-            }
-            return a.lastName.toLowerCase().localeCompare(
-                b.lastName.toLowerCase(),
-                "en",
-                { sensitivity: "base" },
-            );
-        });
+        const pastVolunteers = Array.from(volunteerByName.values())
+            .map((volunteer) => ({
+                ...volunteer,
+                email: volunteer.email ? volunteer.email.trim() : volunteer.email,
+                firstName: capitalizeVolunteerName(volunteer.firstName),
+                lastName: capitalizeVolunteerName(volunteer.lastName),
+            }))
+            .sort(compareVolunteerNames);
 
         return sendResponse(
             res,
