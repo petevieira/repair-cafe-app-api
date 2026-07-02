@@ -208,84 +208,50 @@ async function getVolunteersByEvent(req, res) {
 
 async function getPastVolunteers(req, res) {
     try {
-        const volunteers = await Volunteer.aggregate(
-            [
-                {
-                    $match: {
-                        email: {
-                            $exists: true,
-                            $nin: [null, ""],
-                        },
-                        firstName: {
-                            $exists: true,
-                            $nin: [null, ""],
-                        },
-                        lastName: {
-                            $exists: true,
-                            $nin: [null, ""],
-                        },
-                    },
-                },
-                {
-                    $addFields: {
-                        normalizedEmail: {
-                            $toLower: { $trim: { input: "$email" } },
-                        },
-                        normalizedFirstName: {
-                            $toLower: { $trim: { input: "$firstName" } },
-                        },
-                        normalizedLastName: {
-                            $toLower: { $trim: { input: "$lastName" } },
-                        },
-                    },
-                },
-                {
-                    $match: {
-                        normalizedEmail: { $ne: "" },
-                        normalizedFirstName: { $ne: "" },
-                        normalizedLastName: { $ne: "" },
-                    },
-                },
-                {
-                    $sort: { updatedAt: -1 },
-                },
-                {
-                    $group: {
-                        _id: {
-                            firstName: "$normalizedFirstName",
-                            lastName: "$normalizedLastName",
-                        },
-                        doc: { $first: "$$ROOT" },
-                    },
-                },
-                {
-                    $replaceRoot: {
-                        newRoot: "$doc",
-                    },
-                },
-                {
-                    $project: {
-                        normalizedEmail: 0,
-                        normalizedFirstName: 0,
-                        normalizedLastName: 0,
-                    },
-                },
-            ]
-        );
+        const volunteers = await Volunteer.find({})
+            .sort({ updatedAt: -1 })
+            .lean();
 
-        const pastVolunteers = volunteers
-            .map((volunteer) => ({
+        const seenNameKeys = new Set();
+        const pastVolunteers = [];
+
+        for (const volunteer of volunteers) {
+            const firstName = (volunteer.firstName ?? "").trim();
+            const lastName = (volunteer.lastName ?? "").trim();
+
+            if (!firstName || !lastName) {
+                continue;
+            }
+
+            const nameKey = `${firstName.toLowerCase()}|${lastName.toLowerCase()}`;
+            if (seenNameKeys.has(nameKey)) {
+                continue;
+            }
+            seenNameKeys.add(nameKey);
+
+            pastVolunteers.push({
                 ...volunteer,
-                firstName: toLowerCapFirstLetter(volunteer.firstName),
-                lastName: toLowerCapFirstLetter(volunteer.lastName),
-            }))
-            .sort((a, b) => {
-                const byFirstName = a.firstName.localeCompare(b.firstName, undefined, { sensitivity: "base" });
-                if (byFirstName !== 0) {
-                    return byFirstName;
-                }
-                return a.lastName.localeCompare(b.lastName, undefined, { sensitivity: "base" });
+                email: volunteer.email ? volunteer.email.trim() : volunteer.email,
+                firstName: toLowerCapFirstLetter(firstName),
+                lastName: toLowerCapFirstLetter(lastName),
             });
+        }
+
+        pastVolunteers.sort((a, b) => {
+            const byFirstName = a.firstName.toLowerCase().localeCompare(
+                b.firstName.toLowerCase(),
+                "en",
+                { sensitivity: "base" },
+            );
+            if (byFirstName !== 0) {
+                return byFirstName;
+            }
+            return a.lastName.toLowerCase().localeCompare(
+                b.lastName.toLowerCase(),
+                "en",
+                { sensitivity: "base" },
+            );
+        });
 
         return sendResponse(
             res,
