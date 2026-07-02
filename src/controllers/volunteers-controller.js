@@ -178,7 +178,6 @@ async function getVolunteersByEvent(req, res) {
         },
       },
     ]);
-    console.debug("Volunteers found: ", volunteers);
     return sendResponse(res, `Found ${volunteers.length} volunteer(s) for event ${req.params.eventId}`, {
       volunteers: volunteers,
     });
@@ -249,14 +248,10 @@ async function getPastVolunteers(req, res) {
       createdAt: volunteer.createdAt,
     }));
 
-    return sendResponse(
-      res,
-      `Found ${pastVolunteers.length} unique volunteer(s)`,
-      {
-        pastVolunteers,
-        meta: { sortBy: "firstName", version: 2 },
-      }
-    );
+    return sendResponse(res, `Found ${pastVolunteers.length} unique volunteer(s)`, {
+      pastVolunteers,
+      meta: { sortBy: "firstName", version: 2 },
+    });
   } catch (error) {
     return sendResponse(res, extractErrorMessage(error), {}, StatusCodes.INTERNAL_SERVER_ERROR);
   }
