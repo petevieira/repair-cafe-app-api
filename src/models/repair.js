@@ -64,6 +64,10 @@ const repairSchema = new Schema(
       $type: String,
       trim: true,
     },
+    previousRepairer: {
+      $type: String,
+      trim: true,
+    },
     repairStatus: {
       $type: String,
       trim: true,
