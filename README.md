@@ -1,4 +1,5 @@
 # Server
+
 - NodeJS server for repair cafe apps, using
   - **ExpressJS** for routing
   - **Mongoose** for MongoDB database schemas/modeling
@@ -7,30 +8,37 @@
   - **JsonWebTokens** for creating sign tokens for security
   - **SendGrid** for sending emails from the server and creating email templates (on SendGrid's website)
 - The initial authentication code for this project was created using the
-tool at https://www.npmjs.com/package/kaloraat
+  tool at https://www.npmjs.com/package/kaloraat
 
 ## Setup
+
 1. Install third-party packages
-    - `npm install`
+   - `npm install`
 1. `.env` in the root of the server is used to set environment variables. Use the env.default starter file to make a valid .env file
 1. Start the local server
-    - `npm run start`
+   - `npm run start`
 1. Go to http://localhost:3000 to test the home endpoint.
-    - You should get a simple message in JSON.
+   - You should get a simple message in JSON.
 
 ## Documentation
+
 JSDoc is used to generate code documentation.
 
 ### Create the Documentation
+
 1. From the server root directory run
-  1. `npm run jsdoc`
+1. `npm run jsdoc`
 
 ## Testing
+
 Unit tests are written using the Jest JavaScript testing framework.
+
 ### Run the tests
+
 - `npm run test`
 
 ## Coding Standards
+
 1. Use 2-space indents
 1. Opening braces go on same line as block
 1. 80 character line limit
@@ -38,13 +46,14 @@ Unit tests are written using the Jest JavaScript testing framework.
 1. All functions and data types must be commented using JSDoc format, including at least description, parameters, returns
 
 ## Deploying
+
 - We deploy in a Docker image. To build the image run
-`docker build -t trc-api .`
+  `docker build -t repair-cafe-app-api .`
 - To run the app in the image, run
-`docker run --interactive --tty --publish 3000:3000 trc-api`
+  `docker run --interactive --tty --publish 3000:3000 repair-cafe-app-api`
 
 ### Deploying image to AWS ECR
+
 - For this you'll need the AWS Command Line Interface (CLI). You can download and install it for all users with these two commands. (see [here](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) for more info)
 - `curl "https://awscli.amazonaws.com/AWSCLIV2.pkg" -o "AWSCLIV2.pkg"`
 - `sudo installer -pkg AWSCLIV2.pkg -target /`
-
