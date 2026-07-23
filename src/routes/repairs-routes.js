@@ -40,6 +40,10 @@ router.get("/get-repairs-basic/:eventId",
     repairsController.getRepairsBasic
 );
 
+router.get("/get-stats",
+    repairsController.getRepairStats
+);
+
 router.get("/get-repair/:id",
   authenticateToken,
   requireSignin,
