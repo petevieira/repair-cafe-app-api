@@ -375,6 +375,45 @@ async function getRepairStats(req, res) {
   // Round to 1 decimal for per-event averages.
   const round1 = (n) => Math.round((n || 0) * 10) / 10;
 
+  // Canonical names that themselves include parentheses. These must be kept
+  // as-is so a regex that strips a trailing " (description)" doesn't collapse
+  // e.g. "Kitchen appliance (heating)" into "Kitchen appliance".
+  const canonicalCategoryNamesWithParens = [
+    "Kitchen appliance (heating)",
+    "Kitchen appliance (small)",
+    "Slow cooker (crock pot)",
+  ];
+
+  // Strip an optional trailing " (description)" from stored type values so
+  // "Misc" and "Misc (Any electronic device...)" group as the same category.
+  // The greedy (.*) takes everything up to the *last* " (".
+  const categoryCanonicalExpr = {
+    $let: {
+      vars: {
+        raw: { $trim: { input: { $ifNull: ["$type", ""] } } },
+      },
+      in: {
+        $let: {
+          vars: {
+            match: {
+              $regexFind: {
+                input: "$$raw",
+                regex: "^(.*) \\([^)]*\\)$",
+              },
+            },
+          },
+          in: {
+            $cond: [
+              { $in: ["$$raw", canonicalCategoryNamesWithParens] },
+              "$$raw",
+              { $ifNull: [{ $arrayElemAt: ["$$match.captures", 0] }, "$$raw"] },
+            ],
+          },
+        },
+      },
+    },
+  };
+
   // Accumulators shared by the per-year and all-time groupings. Each metric is
   // computed in a single pass using $cond to conditionally count/sum only the
   // documents matching a given status. `statusLower`, `costNum`, and `weightNum`
@@ -444,11 +483,15 @@ async function getRepairStats(req, res) {
         // - costNum/weightNum: coerce to double so stray strings or nulls become 0
         //   instead of breaking the $sum.
         // - year: calendar year (UTC) extracted from createdAt for per-year buckets.
+        // - categoryCanonical: short category name with an optional trailing
+        //   " (description)" stripped, so old "Misc" records and newer
+        //   "Misc (Any electronic...)" records rank as one category.
         $addFields: {
           statusLower: { $toLower: { $ifNull: ["$repairStatus", ""] } },
           costNum: { $convert: { input: "$cost", to: "double", onError: 0, onNull: 0 } },
           weightNum: { $convert: { input: "$weight", to: "double", onError: 0, onNull: 0 } },
           year: { $year: "$createdAt" },
+          categoryCanonical: categoryCanonicalExpr,
         },
       },
       {
@@ -465,8 +508,8 @@ async function getRepairStats(req, res) {
           // top 8. The $sort before the second $group is what makes $slice return
           // the highest-count categories.
           topCategoriesByYear: [
-            { $match: { type: { $nin: [null, ""] } } },
-            { $group: { _id: { year: "$year", category: "$type" }, count: { $sum: 1 } } },
+            { $match: { categoryCanonical: { $nin: [null, ""] } } },
+            { $group: { _id: { year: "$year", category: "$categoryCanonical" }, count: { $sum: 1 } } },
             { $sort: { "_id.year": 1, count: -1 } },
             {
               $group: {
@@ -478,8 +521,8 @@ async function getRepairStats(req, res) {
           ],
           // Top 8 categories across all years combined.
           topCategoriesAllTime: [
-            { $match: { type: { $nin: [null, ""] } } },
-            { $group: { _id: "$type", count: { $sum: 1 } } },
+            { $match: { categoryCanonical: { $nin: [null, ""] } } },
+            { $group: { _id: "$categoryCanonical", count: { $sum: 1 } } },
             { $sort: { count: -1 } },
             { $limit: 8 },
           ],
